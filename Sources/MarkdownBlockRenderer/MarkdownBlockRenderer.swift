@@ -51,7 +51,9 @@ where Target: Markdown.BlockMarkup,
 		let url = outputDirectory
 			.appending(path: filename)
 			.appendingPathExtension(fileExtension)
-		// TODO: render into file at URL
+		if FileManager.default.fileExists(atPath: url.path()) {
+			return url
+		}
 		try self.render(content, url)
 		return url
 	}
