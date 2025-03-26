@@ -38,7 +38,7 @@ struct RenderMermaid: AsyncParsableCommand {
 			   checkout main
 			   commit
 			   commit
-			``mermaid
+			```
 
 			Text.
 			"""
