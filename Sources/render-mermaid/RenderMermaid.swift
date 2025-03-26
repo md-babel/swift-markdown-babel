@@ -7,7 +7,10 @@ import Markdown
 struct RenderMermaid: AsyncParsableCommand {
 	mutating func run() async throws {
 		let tmpDir = FileManager.default.temporaryDirectory
-		let renderer = MarkdownBlockRenderer<Markdown.CodeBlock>(outputDirectory: tmpDir)
+		let renderer = MarkdownBlockRenderer<Markdown.CodeBlock, String>(
+			outputDirectory: tmpDir,
+			extractContent: \.code
+		)
 		let document = Document(parsing:
 			"""
 			# Heading
