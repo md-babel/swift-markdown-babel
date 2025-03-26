@@ -15,12 +15,37 @@ extension Pipe {
 @main
 struct RenderMermaid: AsyncParsableCommand {
 	@Option(
-		name: .customLong("mermaid"),
+		name: [.customShort("m"), .customLong("mermaid")],
 		help: "Path to the mmdc executable."
 	)
 	var mermaidPath: String
 
+	@Option(
+		name: [.customShort("i"), .customLong("input")],
+		help: "Input file path.",
+		transform: { URL(fileURLWithPath: $0) }
+	)
+	var inputFile: URL?
+
+	@Flag(
+		name: [.customShort("v"), .customLong("verbose")],
+		help: "Print render status to standard output."
+	)
+	var verbose: Bool = false
+
+	func markdownDocument() throws -> Markdown.Document {
+		if let inputFile {
+			return try Document(parsing: inputFile)
+		} else if let string = readLine() {
+			return Document(parsing: string)
+		} else {
+			throw ArgumentParser.ValidationError("Provide either STDIN or \(_inputFile.description)")
+		}
+	}
+
 	mutating func run() async throws {
+		let document = try markdownDocument()
+
 		let tmpDir = FileManager.default.temporaryDirectory
 		try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
 		let mermaidPath = self.mermaidPath
@@ -28,11 +53,10 @@ struct RenderMermaid: AsyncParsableCommand {
 			outputDirectory: tmpDir,
 			fileExtension: "png",
 			extractContent: \.code
-		) { (code: String, url: URL) in
+		) { [verbose] (code: String, url: URL) in
 			let path = url.path(percentEncoded: false)
-			print(path)
 			let stdin = try Pipe.stdin(string: code)
-			let stderr = Pipe()
+			let stdout = Pipe()
 			let process = Process()
 			process.executableURL = URL(fileURLWithPath: mermaidPath)
 			process.arguments = [
@@ -40,43 +64,15 @@ struct RenderMermaid: AsyncParsableCommand {
 				"-o", path,
 			]
 			process.standardInput = stdin
-			process.standardError = stderr
+			process.standardError = FileHandle.standardError
+			process.standardOutput = stdout
 			try process.run()
-			let error = String(decoding: stderr.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-			print(error)
+
+			if verbose {
+				let outputData = stdout.fileHandleForReading.readDataToEndOfFile()
+				try FileHandle.standardOutput.write(contentsOf: outputData)
+			}
 		}
-		let document = Document(parsing:
-			"""
-			# Heading
-
-			Text.
-
-			```mermaid
-			graph TD;
-			  A-->B;
-			  A-->C;
-			  B-->D;
-			  C-->D;
-			```
-
-			Text.
-
-			```mermaid
-			gitGraph
-			   commit
-			   commit
-			   branch develop
-			   commit
-			   commit
-			   commit
-			   checkout main
-			   commit
-			   commit
-			```
-
-			Text.
-			"""
-		)
 
 		let files = try await renderer.renderedFiles(document: document)
 
