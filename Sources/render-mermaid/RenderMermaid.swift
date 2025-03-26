@@ -14,7 +14,10 @@ extension Pipe {
 
 @main
 struct RenderMermaid: AsyncParsableCommand {
-	@Argument
+	@Option(
+		name: .customLong("mermaid"),
+		help: "Path to the mmdc executable."
+	)
 	var mermaidPath: String
 
 	mutating func run() async throws {
