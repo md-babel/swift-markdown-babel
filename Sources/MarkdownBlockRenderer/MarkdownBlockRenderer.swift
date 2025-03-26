@@ -11,13 +11,19 @@ where Target: Markdown.BlockMarkup,
 
 	let outputDirectory: URL
 	let extractContent: (Target) -> Content
+	let render: (_ content: Content, _ url: URL) throws -> Void
+	let fileExtension: String
 
 	public init(
 		outputDirectory: URL,
-		extractContent: @escaping (Target) -> Content
+		fileExtension: String,
+		extractContent: @escaping (Target) -> Content,
+		render: @escaping (_ content: Content, _ url: URL) throws -> Void
 	) {
 		self.outputDirectory = outputDirectory
+		self.fileExtension = fileExtension
 		self.extractContent = extractContent
+		self.render = render
 	}
 
 	public func renderedFiles(
@@ -38,14 +44,15 @@ where Target: Markdown.BlockMarkup,
 		return renderedBlocks.map(\.1)
 	}
 
-	func render(target: Target) async throws(DataConversionFailed) -> URL {
+	func render(target: Target) async throws -> URL {
 		let content = extractContent(target)
 		let contentHash = try self.contentHash(content: content)
 		let filename = "rendered-" + contentHash
 		let url = outputDirectory
 			.appending(path: filename)
-			// .appendingPathExtension("png") // TODO: Renderer declares output type
+			.appendingPathExtension(fileExtension)
 		// TODO: render into file at URL
+		try self.render(content, url)
 		return url
 	}
 
