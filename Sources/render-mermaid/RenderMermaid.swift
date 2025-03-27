@@ -54,8 +54,8 @@ struct RenderMermaid: AsyncParsableCommand {
 		} else if let string = readLine() {
 			return Document(parsing: string)
 		} else {
-			throw ArgumentParser.ValidationError(
-				"Provide either STDIN or \(_inputFile.description)")
+			// To test this, try to `readLine()` twice; the second one will fail because STDIN has already been emptied.
+			throw RenderError(message: "Provide either non-empty STDIN or input file")
 		}
 	}
 
