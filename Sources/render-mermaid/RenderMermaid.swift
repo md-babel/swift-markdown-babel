@@ -16,6 +16,10 @@ struct RenderError: Error {
 	let message: String
 }
 
+// Supported image output formats as of mmdc v11.4.2.
+let mermaidImageOutputFormats = ["svg", "png", "pdf"]
+let defaultImageOutputFormat = "svg"
+
 @main
 struct RenderMermaid: AsyncParsableCommand {
 	@Option(
@@ -42,6 +46,12 @@ struct RenderMermaid: AsyncParsableCommand {
 		help: "Output directory to create diagrams in."
 	)
 	var outputPath: String?
+
+	@Option(
+		name: [.customShort("f"), .customLong("format")],
+		help: "Image output format, one of \(mermaidImageOutputFormats)."
+	)
+	var format: String = defaultImageOutputFormat
 
 	func log(_ string: @autoclosure () -> String) {
 		guard verbose else { return }
@@ -95,12 +105,23 @@ struct RenderMermaid: AsyncParsableCommand {
 		return URL(fileURLWithPath: path, isDirectory: true)
 	}
 
+	func fileExtension() throws -> String {
+		let format = self.format.lowercased()
+		guard mermaidImageOutputFormats.contains(format) else {
+			throw RenderError(
+				message:
+					"Output format “\(format)” not recognized. Choices: \(mermaidImageOutputFormats)"
+			)
+		}
+		return format
+	}
+
 	mutating func run() async throws {
 		let document = try markdownDocument()
 		let mermaidPath = self.mermaidPath
 		let renderer = MarkdownBlockRenderer<Markdown.CodeBlock, String>(
 			outputDirectory: try outputDirectory(),
-			fileExtension: "png",
+			fileExtension: try fileExtension(),
 			extractContent: \.code
 		) { [verbose] (code: String, url: URL) in
 			let path = url.path(percentEncoded: false)
