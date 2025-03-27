@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
 	name: "MarkdownBlockRenderer",
 	platforms: [
-		.macOS(.v14),
+		.macOS(.v14)
 	],
 	dependencies: [
 		.package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
@@ -15,7 +15,7 @@ let package = Package(
 		.target(
 			name: "MarkdownBlockRenderer",
 			dependencies: [
-				.product(name: "Markdown", package: "swift-markdown"),
+				.product(name: "Markdown", package: "swift-markdown")
 			]
 		),
 		.executableTarget(

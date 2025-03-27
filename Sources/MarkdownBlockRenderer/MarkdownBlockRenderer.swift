@@ -1,10 +1,12 @@
-import Markdown
-import Foundation
 import CryptoKit
+import Foundation
+import Markdown
 
 public struct MarkdownBlockRenderer<Target, Content>
-where Target: Markdown.BlockMarkup,
-	  Content: DataConvertible {
+where
+	Target: Markdown.BlockMarkup,
+	Content: DataConvertible
+{
 	public enum RenderingError: Error {
 		case dataConversionFailed(Content)
 	}
@@ -48,7 +50,8 @@ where Target: Markdown.BlockMarkup,
 		let content = extractContent(target)
 		let contentHash = try self.contentHash(content: content)
 		let filename = "rendered-" + contentHash
-		let url = outputDirectory
+		let url =
+			outputDirectory
 			.appending(path: filename)
 			.appendingPathExtension(fileExtension)
 		if FileManager.default.fileExists(atPath: url.path()) {
@@ -61,7 +64,8 @@ where Target: Markdown.BlockMarkup,
 	func contentHash(content: Content) throws(DataConversionFailed) -> String {
 		let data = try content.data()
 		let digest = SHA256.hash(data: data)
-		return digest
+		return
+			digest
 			.map { String(format: "%02x", $0) }
 			.joined()
 	}
@@ -69,9 +73,9 @@ where Target: Markdown.BlockMarkup,
 
 struct TargetVisitor<Target>: Markdown.MarkupWalker
 where Target: Markdown.BlockMarkup {
-	let visit: (Target) -> ()
+	let visit: (Target) -> Void
 
-	mutating func defaultVisit(_ markup: any Markup) -> () {
+	mutating func defaultVisit(_ markup: any Markup) {
 		if let target = markup as? Target {
 			visit(target)
 		} else {
