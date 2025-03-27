@@ -71,11 +71,10 @@ struct RenderMermaid: AsyncParsableCommand {
 	}
 
 	func outputDirectory() throws -> URL {
-		if let outputPath {
-			return try directory(forPath: outputPath)
-		} else {
+		guard let outputPath else {
 			return try temporaryOutputDirectory()
 		}
+		return try directory(forPath: outputPath)
 	}
 
 	private func temporaryOutputDirectory() throws -> URL {
@@ -84,19 +83,16 @@ struct RenderMermaid: AsyncParsableCommand {
 		log("Using temporary directory: “\(tmpDir)”")
 
 		do {
-			try FileManager.default.createDirectory(
-				at: tmpDir, withIntermediateDirectories: true)
+			try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
 			return tmpDir
 		} catch let error {
-			throw RenderError(
-				message: "Could not create temporary directory at “\(tmpDir)”: \(error)")
+			throw RenderError(message: "Could not create temporary directory at “\(tmpDir)”: \(error)")
 		}
 	}
 
 	private func directory(forPath path: String) throws -> URL {
 		var isDirectory: ObjCBool = false
-		let pathExists = FileManager.default.fileExists(
-			atPath: path, isDirectory: &isDirectory)
+		let pathExists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
 		guard pathExists else {
 			throw RenderError(message: "Output directory at “\(path)” does not exist")
 		}
@@ -110,8 +106,7 @@ struct RenderMermaid: AsyncParsableCommand {
 		let format = self.format.lowercased()
 		guard mermaidImageOutputFormats.contains(format) else {
 			throw RenderError(
-				message:
-					"Output format “\(format)” not recognized. Choices: \(mermaidImageOutputFormats)"
+				message: "Output format “\(format)” not recognized. Choices: \(mermaidImageOutputFormats)"
 			)
 		}
 		return format
