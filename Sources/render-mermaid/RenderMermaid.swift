@@ -12,8 +12,9 @@ extension Pipe {
 	}
 }
 
-struct RenderError: Error {
+struct RenderError: Error, CustomStringConvertible {
 	let message: String
+	var description: String { "Rendering error: \(message)" }
 }
 
 // Supported image output formats as of mmdc v11.4.2.
