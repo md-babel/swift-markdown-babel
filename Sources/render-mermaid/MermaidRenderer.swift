@@ -30,9 +30,8 @@ struct MermaidRenderer {
 	func render() async throws {
 		let renderer = MarkdownBlockRenderer<Markdown.CodeBlock, String>(
 			outputDirectory: outputDirectory,
-			fileExtension: outputFileExtension,
-			extractContent: \.code
-		) { (code: String, url: URL) async throws in
+			fileExtension: outputFileExtension
+		) { (code: String, url: URL) throws in
 			let path = url.path(percentEncoded: false)
 			let stdin = try Pipe.stdin(string: code)
 			let stdout = Pipe()
@@ -53,8 +52,13 @@ struct MermaidRenderer {
 			}
 		}
 
-		let files = try await renderer.renderedFiles(document: document)
-
+		var files: [URL] = []
+		document
+			.forEach(Markdown.CodeBlock.self)
+			.do { (codeBlock: Markdown.CodeBlock) in
+				let file = try! renderer.render(codeBlock, \Markdown.CodeBlock.code)
+				files.append(file)
+			}
 		print(files)
 	}
 }
