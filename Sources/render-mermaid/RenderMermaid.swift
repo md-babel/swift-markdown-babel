@@ -23,11 +23,26 @@ let defaultImageOutputFormat = "svg"
 
 @main
 struct RenderMermaid: AsyncParsableCommand {
+	mutating func run() async throws {
+		let render = MermaidRenderer(
+			mermaidPath: mermaidPath,
+			document: try markdownDocument(),
+			outputDirectory: try await outputDirectory(),
+			outputFileExtension: try fileExtension(),
+			log: logger()
+		)
+		try await render()
+	}
+
+	// MARK: - Mermaid CLI path
+
 	@Option(
 		name: [.customShort("m"), .customLong("mermaid")],
 		help: "Path to the mmdc executable."
 	)
 	var mermaidPath: String
+
+	// MARK: - Input File
 
 	@Option(
 		name: [.customShort("i"), .customLong("input")],
@@ -35,29 +50,6 @@ struct RenderMermaid: AsyncParsableCommand {
 		transform: { URL(fileURLWithPath: $0) }
 	)
 	var inputFile: URL?
-
-	@Flag(
-		name: [.customShort("v"), .customLong("verbose")],
-		help: "Print render status to standard output."
-	)
-	var verbose: Bool = false
-
-	@Option(
-		name: [.customShort("o"), .customLong("outdir")],
-		help: "Output directory to create diagrams in."
-	)
-	var outputPath: String?
-
-	@Option(
-		name: [.customShort("f"), .customLong("format")],
-		help: "Image output format, one of \(mermaidImageOutputFormats)."
-	)
-	var format: String = defaultImageOutputFormat
-
-	func log(_ string: @autoclosure () -> String) {
-		guard verbose else { return }
-		try! FileHandle.standardOutput.write(string().data())
-	}
 
 	func markdownDocument() throws -> Markdown.Document {
 		if let inputFile {
@@ -70,17 +62,27 @@ struct RenderMermaid: AsyncParsableCommand {
 		}
 	}
 
-	func outputDirectory() throws -> URL {
+	// MARK: - Output Directory
+
+	@Option(
+		name: [.customShort("o"), .customLong("outdir")],
+		help: "Output directory to create diagrams in."
+	)
+	var outputPath: String?
+
+	func outputDirectory() async throws -> URL {
 		guard let outputPath else {
-			return try temporaryOutputDirectory()
+			return try await makeTemporaryOutputDirectory()
 		}
 		return try directory(forPath: outputPath)
 	}
 
-	private func temporaryOutputDirectory() throws -> URL {
+	@MainActor
+	private func makeTemporaryOutputDirectory() throws -> URL {
 		let tmpDir = FileManager.default.temporaryDirectory
 
-		log("Using temporary directory: “\(tmpDir)”")
+		try! VerboseLogger(isEnabled: self.verbose)
+			.log("Using temporary directory: “\(tmpDir)”")
 
 		do {
 			try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
@@ -102,6 +104,14 @@ struct RenderMermaid: AsyncParsableCommand {
 		return URL(fileURLWithPath: path, isDirectory: true)
 	}
 
+	// MARK: - Output Format
+
+	@Option(
+		name: [.customShort("f"), .customLong("format")],
+		help: "Image output format, one of \(mermaidImageOutputFormats)."
+	)
+	var format: String = defaultImageOutputFormat
+
 	func fileExtension() throws -> String {
 		let format = self.format.lowercased()
 		guard mermaidImageOutputFormats.contains(format) else {
@@ -112,36 +122,15 @@ struct RenderMermaid: AsyncParsableCommand {
 		return format
 	}
 
-	mutating func run() async throws {
-		let document = try markdownDocument()
-		let mermaidPath = self.mermaidPath
-		let renderer = MarkdownBlockRenderer<Markdown.CodeBlock, String>(
-			outputDirectory: try outputDirectory(),
-			fileExtension: try fileExtension(),
-			extractContent: \.code
-		) { [verbose] (code: String, url: URL) in
-			let path = url.path(percentEncoded: false)
-			let stdin = try Pipe.stdin(string: code)
-			let stdout = Pipe()
-			let process = Process()
-			process.executableURL = URL(fileURLWithPath: mermaidPath)
-			process.arguments = [
-				"-i", "-",
-				"-o", path,
-			]
-			process.standardInput = stdin
-			process.standardError = FileHandle.standardError
-			process.standardOutput = stdout
-			try process.run()
+	// MARK: - Verbosity
 
-			if verbose {
-				let outputData = stdout.fileHandleForReading.readDataToEndOfFile()
-				try FileHandle.standardOutput.write(contentsOf: outputData)
-			}
-		}
+	@Flag(
+		name: [.customShort("v"), .customLong("verbose")],
+		help: "Print render status to standard output."
+	)
+	var verbose: Bool = false
 
-		let files = try await renderer.renderedFiles(document: document)
-
-		print(files)
+	func logger() -> VerboseLogger {
+		VerboseLogger(isEnabled: self.verbose)
 	}
 }

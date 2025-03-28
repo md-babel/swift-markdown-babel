@@ -11,16 +11,21 @@ where
 		case dataConversionFailed(Content)
 	}
 
+	public typealias Render = (
+		_ content: Content,
+		_ url: URL
+	) async throws -> Void
+
 	let outputDirectory: URL
 	let extractContent: (Target) -> Content
-	let render: (_ content: Content, _ url: URL) throws -> Void
+	let render: Render
 	let fileExtension: String
 
 	public init(
 		outputDirectory: URL,
 		fileExtension: String,
 		extractContent: @escaping (Target) -> Content,
-		render: @escaping (_ content: Content, _ url: URL) throws -> Void
+		render: @escaping Render
 	) {
 		self.outputDirectory = outputDirectory
 		self.fileExtension = fileExtension
@@ -57,7 +62,7 @@ where
 		if FileManager.default.fileExists(atPath: url.path()) {
 			return url
 		}
-		try self.render(content, url)
+		try await self.render(content, url)
 		return url
 	}
 
