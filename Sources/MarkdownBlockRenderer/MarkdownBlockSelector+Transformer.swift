@@ -2,7 +2,7 @@ extension MarkdownBlockSelector: Transformer {
 	public typealias From = Target
 	public typealias To = Output
 
-	public func `do`(_ sink: @escaping (Output) -> Void) {
+	public func pipe(to sink: Sink<Output>) {
 		var visitor = BlockTargetVisitor { visitedBlock in
 			let output = self.visitor(visitedBlock)
 			sink(output)

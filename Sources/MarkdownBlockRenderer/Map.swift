@@ -9,6 +9,7 @@ where Upstream: Transformer {
 	@usableFromInline
 	let transform: Transformation
 
+	@inlinable @inline(__always)
 	public init(
 		from upstream: Upstream,
 		transform: @escaping Transformation
@@ -22,7 +23,7 @@ extension Map: Transformer {}
 
 extension Map {
 	@inlinable @inline(__always)
-	public func `do`(_ sink: @escaping (To) -> Void) {
+	public func pipe(to sink: Sink<To>) {
 		self.upstream.do { sink(self.transform($0)) }
 	}
 }
