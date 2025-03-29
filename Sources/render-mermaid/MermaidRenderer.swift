@@ -55,7 +55,9 @@ struct MermaidRenderer {
 		var files: [URL] = []
 		document
 			.forEach(Markdown.CodeBlock.self)
-			.do { (codeBlock: Markdown.CodeBlock) in
+			.where { $0.language?.lowercased() == "mermaid" }
+			.do { (codeBlock: Markdown.CodeBlock?) in
+				guard let codeBlock else { return }
 				let file = try! renderer.render(codeBlock, \Markdown.CodeBlock.code)
 				files.append(file)
 			}
