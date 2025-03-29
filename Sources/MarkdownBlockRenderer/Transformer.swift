@@ -1,6 +1,4 @@
-public protocol Transformer {
-	associatedtype Output
-
-	/// Terminating transformation.
-	func `do`(_ sink: @escaping (Output) -> Void)
+public protocol Transformer<From, To> {
+	associatedtype From
+	associatedtype To
 }
