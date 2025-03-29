@@ -1,15 +1,28 @@
-public struct Map<From, To, T>
-where T: Transformer, T.To == From {
-	typealias Transformation = (From) -> To
+public struct Map<Upstream, To>
+where Upstream: Transformer {
+	public typealias From = Upstream.To
+	public typealias Transformation = (From) -> To
 
-	let from: T
+	@usableFromInline
+	let upstream: Upstream
+
+	@usableFromInline
 	let transform: Transformation
+
+	public init(
+		from upstream: Upstream,
+		transform: @escaping Transformation
+	) {
+		self.upstream = upstream
+		self.transform = transform
+	}
 }
 
 extension Map: Transformer {}
 
 extension Map {
+	@inlinable @inline(__always)
 	public func `do`(_ sink: @escaping (To) -> Void) {
-		self.from.do { sink(self.transform($0)) }
+		self.upstream.do { sink(self.transform($0)) }
 	}
 }
