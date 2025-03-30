@@ -65,7 +65,7 @@ struct MermaidRenderer {
 
 				if process.terminationStatus != 0 {
 					let stderrMessage = String(
-						data: stdout.fileHandleForReading.readDataToEndOfFile(),
+						data: stderr.fileHandleForReading.readDataToEndOfFile(),
 						encoding: .utf8
 					)
 					throw RenderError(
