@@ -51,11 +51,11 @@ struct RenderMermaid: AsyncParsableCommand {
 	)
 	var inputFile: URL?
 
-	func markdownDocument() throws -> Markdown.Document {
+	func markdownDocument() throws -> MarkdownDocument {
 		if let inputFile {
-			return try Document(parsing: inputFile)
+			return try MarkdownDocument(parsing: inputFile)
 		} else if let string = readLine() {
-			return Document(parsing: string)
+			return MarkdownDocument(parsing: string)
 		} else {
 			// To test this, try to `readLine()` twice; the second one will fail because STDIN has already been emptied.
 			throw RenderError(message: "Provide either non-empty STDIN or input file")

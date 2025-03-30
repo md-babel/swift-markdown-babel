@@ -4,14 +4,14 @@ import MarkdownBlockRenderer
 
 struct MermaidRenderer {
 	let mermaidPath: String
-	let document: Markdown.Document
+	let document: MarkdownDocument
 	let outputDirectory: URL
 	let outputFileExtension: String
 	let log: VerboseLogger
 
 	init(
 		mermaidPath: String,
-		document: consuming Markdown.Document,
+		document: consuming MarkdownDocument,
 		outputDirectory: URL,
 		outputFileExtension: String,
 		log: VerboseLogger

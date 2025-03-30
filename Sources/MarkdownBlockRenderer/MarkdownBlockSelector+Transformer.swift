@@ -1,5 +1,5 @@
 extension MarkdownBlockSelector: Transformer {
-	public typealias From = Target
+	public typealias From = Block
 	public typealias To = Output
 
 	public func pipe(to sink: NonThrowingSink<Output>) {
