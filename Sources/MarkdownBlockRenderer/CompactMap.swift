@@ -1,7 +1,7 @@
-public struct CompactMap<Upstream, To>
+public struct CompactMap<Upstream, Transformed>
 where Upstream: Transformer {
 	public typealias From = Upstream.To
-	public typealias Transformation = (From) -> To?
+	public typealias Transformation = (From) -> Transformed?
 
 	@usableFromInline
 	let upstream: Upstream
@@ -19,14 +19,24 @@ where Upstream: Transformer {
 	}
 }
 
-extension CompactMap: Transformer {}
-
-extension CompactMap {
+extension CompactMap: Transformer {
 	@inlinable @inline(__always)
-	public func pipe(to sink: Sink<To>) {
-		self.upstream.do {
-			guard let element = self.transform($0) else { return }
-			sink(element)
-		}
+	public func pipe(to sink: NonThrowingSink<Transformed>) {
+		self.upstream.pipe(
+			to: NonThrowingSink {
+				guard let element = self.transform($0) else { return }
+				sink(element)
+			}
+		)
+	}
+
+	@inlinable @inline(__always)
+	public func pipe(to sink: ThrowingSink<Transformed>) throws {
+		try self.upstream.pipe(
+			to: ThrowingSink {
+				guard let element = self.transform($0) else { return }
+				try sink(element)
+			}
+		)
 	}
 }

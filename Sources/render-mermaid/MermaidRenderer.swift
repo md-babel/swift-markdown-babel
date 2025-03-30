@@ -27,6 +27,12 @@ struct MermaidRenderer {
 		try await render()
 	}
 
+	struct MermaidRenderError: Error {
+		let code: String
+		let targetURL: URL
+		let wrapped: (any Error)?
+	}
+
 	func render() async throws {
 		let renderer = MarkdownBlockRenderer<Markdown.CodeBlock, String>(
 			outputDirectory: outputDirectory,
@@ -35,6 +41,7 @@ struct MermaidRenderer {
 			let path = url.path(percentEncoded: false)
 			let stdin = try Pipe.stdin(string: code)
 			let stdout = Pipe()
+			let stderr = Pipe()
 			let process = Process()
 			process.executableURL = URL(fileURLWithPath: mermaidPath)
 			process.arguments = [
@@ -42,22 +49,44 @@ struct MermaidRenderer {
 				"-o", path,
 			]
 			process.standardInput = stdin
-			process.standardError = FileHandle.standardError
+			process.standardError = stderr
 			process.standardOutput = stdout
-			try process.run()
 
-			if log.isEnabled {
-				let outputData = stdout.fileHandleForReading.readDataToEndOfFile()
-				try FileHandle.standardOutput.write(contentsOf: outputData)
+			defer {
+				if log.isEnabled {
+					let outputData = stdout.fileHandleForReading.readDataToEndOfFile()
+					try! FileHandle.standardOutput.write(contentsOf: outputData)
+				}
+			}
+
+			do {
+				try process.run()
+				process.waitUntilExit()
+
+				if process.terminationStatus != 0 {
+					let stderrMessage = String(
+						data: stdout.fileHandleForReading.readDataToEndOfFile(),
+						encoding: .utf8
+					)
+					throw RenderError(
+						message: stderrMessage ?? "Process terminated with exit code \(process.terminationStatus)"
+					)
+				}
+			} catch {
+				throw MermaidRenderError(
+					code: code,
+					targetURL: url,
+					wrapped: error
+				)
 			}
 		}
 
 		var files: [URL] = []
-		document
+		try document
 			.forEach(Markdown.CodeBlock.self)
 			.where { $0.language?.lowercased() == "mermaid" }
 			.do { (codeBlock: Markdown.CodeBlock) in
-				let file = try! renderer.render(codeBlock, \Markdown.CodeBlock.code)
+				let file = try renderer.render(codeBlock, \Markdown.CodeBlock.code)
 				files.append(file)
 			}
 		print(files)
