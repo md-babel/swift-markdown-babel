@@ -3,15 +3,6 @@ import Foundation
 import Markdown
 import MarkdownBlockRenderer
 
-extension Pipe {
-	static func stdin(string: String) throws -> Pipe {
-		let stdin = Pipe()
-		try stdin.fileHandleForWriting.write(contentsOf: string.data())
-		try stdin.fileHandleForWriting.close()
-		return stdin
-	}
-}
-
 struct RenderError: Error, CustomStringConvertible {
 	let message: String
 	var description: String { "Rendering error: \(message)" }
