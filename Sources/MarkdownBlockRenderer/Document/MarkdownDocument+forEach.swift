@@ -1,17 +1,12 @@
 import Markdown
 
 extension MarkdownDocument {
-	public func forEach<Target, Output>(
-		_ selector: @escaping (Target) -> Output
-	) -> MarkdownBlockSelector<Target, Output>
-	where Target: Markdown.BlockMarkup {
-		return MarkdownBlockSelector(document: self, recurseIntoTarget: false, visitor: selector)
-	}
-
+	/// Syntactic sugar for ``compactMap(_:)`` with a conditional cast to ``Target``.
+	@inlinable @inline(__always)
 	public func forEach<Target>(
 		_ targetType: Target.Type
-	) -> MarkdownBlockSelector<Target, Target>
-	where Target: Markdown.BlockMarkup {
-		return MarkdownBlockSelector(document: self, recurseIntoTarget: false) { $0 }
+	) -> CompactMap<InitialDocument, Target>
+	where Target: Markdown.Markup {
+		return compactMap { $0 as? Target }
 	}
 }

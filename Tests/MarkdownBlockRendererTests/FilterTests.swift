@@ -2,7 +2,7 @@ import Markdown
 import MarkdownBlockRenderer
 import Testing
 
-@Suite("Filter") struct FilterTests {
+@Suite("Filtering") struct FilterTests {
 	@Suite("just one value") struct JustOneValue {
 		let isOdd = { (num: Int) -> Bool in
 			num % 2 == 1
