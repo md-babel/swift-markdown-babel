@@ -85,9 +85,11 @@ struct MermaidRenderer {
 		try document
 			.forEach(Markdown.CodeBlock.self)
 			.where { $0.language?.lowercased() == "mermaid" }
-			.do { (codeBlock: Markdown.CodeBlock) in
+			.do { (codeBlock: Markdown.CodeBlock) in  // -> Markdown.CustomBlock in
 				let file = try renderer.render(codeBlock, \Markdown.CodeBlock.code)
 				files.append(file)
+				let commentBlock = Markdown.Paragraph(Markdown.Text("Test"))
+				// return Markdown.CustomBlock(codeBlock, commentBlock)
 			}
 		print(files)
 	}
