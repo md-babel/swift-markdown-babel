@@ -3,7 +3,7 @@ extension MarkdownBlockSelector: Transformer {
 	public typealias To = Output
 
 	public func pipe(to sink: NonThrowingSink<Output>) {
-		var visitor = TargetMarkupVisitor(recurseIntoTarget: recurseIntoTarget) { visitedBlock in
+		var visitor = RecursiveMarkupWalker(recurseIntoTarget: recurseIntoTarget) { (visitedBlock: Block) in
 			let output = self.visitor(visitedBlock)
 			sink(output)
 		}
@@ -12,16 +12,17 @@ extension MarkdownBlockSelector: Transformer {
 
 	public func pipe(to sink: ThrowingSink<Output>) throws {
 		var error: (any Error)?
-		var visitor = TargetMarkupVisitor(recurseIntoTarget: recurseIntoTarget) { visitedBlock in
-			guard error == nil else { return }
+		var visitor =
+			RecursiveMarkupWalker(recurseIntoTarget: recurseIntoTarget) { (visitedBlock: Block) in
+				guard error == nil else { return }
 
-			let output = self.visitor(visitedBlock)
-			do {
-				try sink(output)
-			} catch let e {
-				error = e
+				let output = self.visitor(visitedBlock)
+				do {
+					try sink(output)
+				} catch let e {
+					error = e
+				}
 			}
-		}
 		visitor.visit(self.document)
 		if let error {
 			throw error
