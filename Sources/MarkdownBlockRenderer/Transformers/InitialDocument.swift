@@ -7,6 +7,12 @@ public struct InitialDocument: Transformer {
 
 	public let document: MarkdownDocument
 
+	public init(
+		document: MarkdownDocument
+	) {
+		self.document = document
+	}
+
 	public func pipe(to sink: NonThrowingSink<To>) {
 		var visitor = AnyMarkupWalker { sink($0) }
 		visitor.visit(self.document)

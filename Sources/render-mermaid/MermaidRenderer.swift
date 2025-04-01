@@ -83,7 +83,7 @@ struct MermaidRenderer {
 
 		var files: [URL] = []
 		try document
-			.forEach(Markdown.CodeBlock.self)
+			.compactMap { $0 as? Markdown.CodeBlock }
 			.where { $0.language?.lowercased() == "mermaid" }
 			.do { (codeBlock: Markdown.CodeBlock) in  // -> Markdown.CustomBlock in
 				let file = try renderer.render(codeBlock, \Markdown.CodeBlock.code)
