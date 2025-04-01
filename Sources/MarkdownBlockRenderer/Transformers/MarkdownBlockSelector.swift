@@ -4,6 +4,6 @@ public struct MarkdownBlockSelector<Block, Output>
 where Block: Markdown.BlockMarkup {
 	typealias Visitor = (_ visitedBlock: Block) -> Output
 
-	let document: Markdown.Document
+	let document: MarkdownDocument
 	let visitor: Visitor
 }
