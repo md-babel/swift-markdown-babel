@@ -9,16 +9,16 @@ import Testing
 		}
 
 		@Test func transformationReturnsNil() {
-			let compactMap = CompactMap(from: Just(3), transform: even)
-			var results: [Int] = []
-			compactMap.do { results.append($0) }
+			let results = collect {
+				CompactMap(from: Just(3), transform: even)
+			}
 			#expect(results == [])
 		}
 
 		@Test func transformationReturnsValue() {
-			let compactMap = CompactMap(from: Just(2), transform: even)
-			var results: [Int] = []
-			compactMap.do { results.append($0) }
+			let results: [Int] = collect {
+				CompactMap(from: Just(2), transform: even)
+			}
 			#expect(results == [2])
 		}
 	}
@@ -36,14 +36,13 @@ import Testing
 		)
 
 		@Test("via forEach") func forEachDocumentPart() {
-			let compactMap =
+			let results = collect {
 				document
-				.forEach(Markdown.Heading.self)
-				.map { heading in
-					"\(heading.level): \((heading.child(at: 0) as! Markdown.Text).string)"
-				}
-			var results: [String] = []
-			compactMap.do { results.append($0) }
+					.forEach(Markdown.Heading.self)
+					.map { heading in
+						"\(heading.level): \((heading.child(at: 0) as! Markdown.Text).string)"
+					}
+			}
 			#expect(
 				results == [
 					"1: Chapter",
@@ -54,14 +53,13 @@ import Testing
 		}
 
 		@Test("via compactMap") func compactMapDocumentParts() {
-			let compactMap =
+			let results = collect {
 				document
-				.compactMap { $0 as? Markdown.Heading }
-				.map { heading in
-					"\(heading.level): \((heading.child(at: 0) as! Markdown.Text).string)"
-				}
-			var results: [String] = []
-			compactMap.do { results.append($0) }
+					.compactMap { $0 as? Markdown.Heading }
+					.map { heading in
+						"\(heading.level): \((heading.child(at: 0) as! Markdown.Text).string)"
+					}
+			}
 			#expect(
 				results == [
 					"1: Chapter",

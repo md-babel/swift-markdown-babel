@@ -9,16 +9,16 @@ import Testing
 		}
 
 		@Test func predicateReturnsTrue() {
-			let compactMap = Filter(from: Just(3), predicate: isOdd)
-			var results: [Int] = []
-			compactMap.do { results.append($0) }
+			let results = collect {
+				Filter(from: Just(3), predicate: isOdd)
+			}
 			#expect(results == [3])
 		}
 
 		@Test func predicateReturnsFalse() {
-			let compactMap = Filter(from: Just(2), predicate: isOdd)
-			var results: [Int] = []
-			compactMap.do { results.append($0) }
+			let results = collect {
+				Filter(from: Just(2), predicate: isOdd)
+			}
 			#expect(results == [])
 		}
 	}
@@ -34,13 +34,13 @@ import Testing
 				### Subsection
 				"""
 		)
+
 		@Test func ignoresUnmatchedParts() {
-			let filtered =
+			let results = collect {
 				document
-				.filter { $0 is Markdown.Text && !($0.parent is Markdown.Heading) }
-				.map { $0.format() }
-			var results: [String] = []
-			filtered.do { results.append($0) }
+					.filter { $0 is Markdown.Text && !($0.parent is Markdown.Heading) }
+					.map { $0.format() }
+			}
 			#expect(
 				results == [
 					"Text in chapter",
