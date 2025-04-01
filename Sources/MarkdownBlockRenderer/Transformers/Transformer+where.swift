@@ -1,19 +1,19 @@
 extension Transformer {
-	/// Transform the output element of `self` to an optional downstream element, skipping `nil`.
+	/// Filter output element of `self` with `predicate`, skipping elements that don't satisfy the test.
+	///
+	/// Syntactic sugar for ``filter(_:)``.
 	@inlinable @inline(__always)
-	public func compactMap<Next>(
-		_ transform: @escaping (To) -> Next?
-	) -> CompactMap<Self, Next> {
-		return CompactMap(from: self, transform: transform)
+	public func `where`(
+		_ predicate: @escaping (To) -> Bool
+	) -> CompactMap<Self, To> {
+		return filter(predicate)
 	}
-}
 
-extension Transformer {
 	/// Filter output element of `self` with `predicate`, skipping elements that don't satisfy the test.
 	///
 	/// - See: ``compactMap(_:)`` and ``CompactMap`` as the underlying transformation.
 	@inlinable @inline(__always)
-	public func `where`(
+	public func filter(
 		_ predicate: @escaping (To) -> Bool
 	) -> CompactMap<Self, To> {
 		return compactMap { predicate($0) ? $0 : nil }
