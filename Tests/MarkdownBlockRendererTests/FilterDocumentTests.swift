@@ -20,15 +20,19 @@ import Testing
 
 	@Test func filteringDoesntAffectOutput() {
 		/// Demonstrates that the filter closure is actually used.
-		var collectedText: [String] = []
+		var collectedTexts: [String] = []
 		let transformation = AnyFilterDocument(base: document) {
 			let isText = $0 is Markdown.Text && !($0.parent is Markdown.Heading)
 			if isText {
-				collectedText.append(($0 as! Markdown.Text).string)
+				collectedTexts.append(($0 as! Markdown.Text).string)
 			}
 			return isText
 		}
-		let result = transformation.markdown().format()
+		let result =
+			transformation
+			.markdown(visitor: { $0 })  // Apply downstream visitor to avoid optimizing the filter away completely. Without this, `collectedTexts` would be empty.
+			.markdown()
+			.format()
 		let expected =
 			"""
 			# Chapter
@@ -42,6 +46,6 @@ import Testing
 			### Subsection
 			"""
 		#expect(result == expected)
-		#expect(collectedText == ["Text in chapter", "Text in section"])
+		#expect(collectedTexts == ["Text in chapter", "Text in section"])
 	}
 }

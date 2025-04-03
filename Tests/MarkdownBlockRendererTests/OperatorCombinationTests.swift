@@ -38,4 +38,30 @@ import Testing
 			"""
 		#expect(result == expected)
 	}
+
+	@Test func compactMap() {
+		let transformation =
+			document
+			.compactMap { element -> Markdown.Text? in
+				guard let text = element as? Markdown.Text, !(text.parent is Markdown.Heading) else { return nil }
+				return text
+			}
+			.map { text in
+				Markdown.Text(text.string + " is extended")
+			}
+		let result = transformation.markdown().format()
+		let expected =
+			"""
+			# Chapter
+
+			Text in chapter is extended
+
+			## Section
+
+			Text in section is extended
+
+			### Subsection
+			"""
+		#expect(result == expected)
+	}
 }

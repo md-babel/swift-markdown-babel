@@ -16,9 +16,14 @@ where Base: Document {
 	public func markdown(visitor: @escaping (AnyElement) -> AnyElement?) -> Base.VisitedDocument {
 		return base.markdown(visitor: { transform($0).flatMap(visitor) })
 	}
+
+	public func markdown() -> Markdown.Document {
+		return base.markdown(visitor: transform).markdown()
+	}
 }
 
 extension Document {
+	@_disfavoredOverload
 	@inlinable @inline(__always)
 	public func map(_ transform: @escaping (AnyElement) -> AnyElement?) -> some Document {
 		return AnyMapDocument(base: self, transform)

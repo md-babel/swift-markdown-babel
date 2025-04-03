@@ -2,7 +2,7 @@ import Markdown
 import MarkdownBlockRenderer
 import Testing
 
-@Suite struct MapDocumentTests {
+@Suite struct CompactMapDocumentTests {
 	@Test func mapHeadingLevelsParts() {
 		let document = MarkdownDocument(
 			parsing:
@@ -16,10 +16,8 @@ import Testing
 				"""
 		)
 
-		let transformation = AnyMapDocument(base: document) { element in
-			guard var heading = element as? Markdown.Heading else {
-				return element
-			}
+		let transformation = CompactMapDocument(base: document) { element -> Markdown.Heading? in
+			guard var heading = element as? Markdown.Heading else { return nil }
 			heading.level += 1
 			return heading
 		}

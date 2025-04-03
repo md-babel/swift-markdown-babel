@@ -9,16 +9,14 @@ public protocol Document {
 	func markdown() -> Markdown.Document
 }
 
-extension Document {
-	public func markdown() -> Markdown.Document {
-		return self.markdown(visitor: { $0 }).markdown()
-	}
-}
-
 extension Markdown.Document: Document {
 	public func markdown(visitor: @escaping (AnyElement) -> AnyElement?) -> Markdown.Document {
 		var visitor = AnyMarkupRewriter(transform: visitor)
 		return visitor.visit(self) as! Markdown.Document
+	}
+
+	public func markdown() -> Markdown.Document {
+		return self
 	}
 }
 
@@ -35,5 +33,9 @@ public struct MarkdownDocument: Document {
 
 	public func markdown(visitor: @escaping (AnyElement) -> AnyElement?) -> Markdown.Document {
 		return document.markdown(visitor: visitor)
+	}
+
+	public func markdown() -> Markdown.Document {
+		return document.markdown { $0 }.markdown()
 	}
 }
