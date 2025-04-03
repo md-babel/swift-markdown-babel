@@ -3,19 +3,33 @@ import MarkdownBlockRenderer
 import Testing
 
 @Suite struct MapDocumentTests {
-	@Test func mapHeadingLevelsParts() {
-		let document = MarkdownDocument(
-			parsing:
-				"""
-				# Chapter
-				Text
-				## Section 1
-				Text
-				## Section 2
-				Text
-				"""
-		)
+	let document = MarkdownDocument(
+		parsing:
+			"""
+			# Chapter
+			Text
+			## Section 1
+			Text
+			## Section 2
+			Text
+			"""
+	)
+	let expected =
+		"""
+		## Chapter
 
+		Text
+
+		### Section 1
+
+		Text
+
+		### Section 2
+
+		Text
+		"""
+
+	@Test func anyMapHeadingLevelsParts() {
 		let transformation = AnyMapDocument(base: document) { element in
 			guard var heading = element as? Markdown.Heading else {
 				return element
@@ -24,20 +38,6 @@ import Testing
 			return heading
 		}
 		let result = transformation.markdown().format()
-		let expected =
-			"""
-			## Chapter
-
-			Text
-
-			### Section 1
-
-			Text
-
-			### Section 2
-
-			Text
-			"""
 		#expect(result == expected)
 	}
 }

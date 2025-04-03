@@ -34,10 +34,3 @@ extension Document {
 		return CompactMapDocument(base: self, transform)
 	}
 }
-
-extension CompactMapDocument {
-	@inlinable @inline(__always)
-	public func map(_ transform: @escaping (Transformed) -> AnyElement?) -> AnyMapDocument<Self> {
-		return AnyMapDocument(base: self, { transform($0 as! Transformed) })
-	}
-}

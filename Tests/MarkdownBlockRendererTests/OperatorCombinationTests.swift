@@ -2,7 +2,7 @@ import Markdown
 import MarkdownBlockRenderer
 import Testing
 
-@Suite struct OperatorCombinationTests {
+@Suite("Operator combinations:") struct OperatorCombinationTests {
 	let document = MarkdownDocument(
 		parsing:
 			"""
@@ -18,7 +18,7 @@ import Testing
 			"""
 	)
 
-	@Test func filterMap() {
+	@Test("filter + any map") func filter_map() {
 		let transformation =
 			document
 			.filter { $0 is Markdown.Text && !($0.parent is Markdown.Heading) }
@@ -39,26 +39,43 @@ import Testing
 		#expect(result == expected)
 	}
 
-	@Test func compactMap() {
+	@Test("compactMap + map") func compactMap_map() {
 		let transformation =
 			document
-			.compactMap { element -> Markdown.Text? in
-				guard let text = element as? Markdown.Text, !(text.parent is Markdown.Heading) else { return nil }
-				return text
-			}
-			.map { text in
-				Markdown.Text(text.string + " is extended")
-			}
+			.compactMap { anyElement in anyElement as? Markdown.Text }
+			.map { text in Markdown.InlineCode(text.string + " is extended") }
+		let result = transformation.markdown().format()
+		let expected =
+			"""
+			# `Chapter is extended`
+
+			`Text in chapter is extended`
+
+			## `Section is extended`
+
+			`Text in section is extended`
+
+			### `Subsection is extended`
+			"""
+		#expect(result == expected)
+	}
+
+	@Test("compactMap + filter + map") func compactMap_filter_map() {
+		let transformation =
+			document
+			.compactMap { anyElement in anyElement as? Markdown.Text }
+			.filter { text in !(text.parent is Markdown.Heading) }
+			.map { text in Markdown.InlineCode(text.string + " is extended") }
 		let result = transformation.markdown().format()
 		let expected =
 			"""
 			# Chapter
 
-			Text in chapter is extended
+			`Text in chapter is extended`
 
 			## Section
 
-			Text in section is extended
+			`Text in section is extended`
 
 			### Subsection
 			"""
