@@ -40,8 +40,8 @@ extension CompactMapDocument {
 	}
 
 	@inlinable @inline(__always)
-	public func filter(_ predicate: @escaping (Transformed) -> Bool) -> AnyFilterDocument<Self> {
-		return AnyFilterDocument(base: self, { predicate($0 as! Transformed) })
+	public func filter(_ predicate: @escaping (Transformed) -> Bool) -> FilterDocument<Self, Transformed> {
+		return FilterDocument(base: self, { predicate($0) })
 	}
 
 	@inlinable @inline(__always)
