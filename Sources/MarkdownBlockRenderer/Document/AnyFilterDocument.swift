@@ -13,8 +13,8 @@ where Base: Document {
 		self.predicate = predicate
 	}
 
-	public func markdown(visitor: @escaping (AnyElement) -> AnyElement?) -> Markdown.Document {
-		base.markdown(visitor: { element in
+	public func markdown(visitor: @escaping (AnyElement) -> AnyElement?) -> Base.VisitedDocument {
+		return base.markdown(visitor: { element in
 			guard predicate(element) else { return element }
 			return visitor(element)
 		})

@@ -13,8 +13,8 @@ where Base: Document {
 		self.transform = transform
 	}
 
-	public func markdown(visitor: @escaping (AnyElement) -> AnyElement?) -> Markdown.Document {
-		base.markdown(visitor: { transform($0).flatMap(visitor) })
+	public func markdown(visitor: @escaping (AnyElement) -> AnyElement?) -> Base.VisitedDocument {
+		return base.markdown(visitor: { transform($0).flatMap(visitor) })
 	}
 }
 
