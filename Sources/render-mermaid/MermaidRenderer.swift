@@ -82,7 +82,8 @@ struct MermaidRenderer {
 		}
 
 		var files: [URL] = []
-		try document
+		_ =
+			try document
 			.compactMap { $0 as? Markdown.CodeBlock }
 			.filter { $0.language?.lowercased() == "mermaid" }
 			.do { (codeBlock: Markdown.CodeBlock) in  // -> Markdown.CustomBlock in
@@ -91,6 +92,7 @@ struct MermaidRenderer {
 				let commentBlock = Markdown.Paragraph(Markdown.Text("Test"))
 				// return Markdown.CustomBlock(codeBlock, commentBlock)
 			}
+			.markdown()
 		print(files)
 	}
 }

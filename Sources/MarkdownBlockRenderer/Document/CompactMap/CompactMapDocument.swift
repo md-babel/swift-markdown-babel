@@ -1,7 +1,9 @@
 import Markdown
 
-public struct CompactMapDocument<Base, Transformed>: Document
+public struct CompactMapDocument<Base, Transformed>: Document, DocumentScope
 where Base: Document, Transformed: Markdown.Markup {
+	public typealias Element = Transformed
+
 	public let base: Base
 	public let transform: (AnyElement) -> Transformed?
 
@@ -37,18 +39,5 @@ extension CompactMapDocument {
 	@inlinable @inline(__always)
 	public func map(_ transform: @escaping (Transformed) -> AnyElement?) -> AnyMapDocument<Self> {
 		return AnyMapDocument(base: self, { transform($0 as! Transformed) })
-	}
-
-	@inlinable @inline(__always)
-	public func filter(_ predicate: @escaping (Transformed) -> Bool) -> FilterDocument<Self, Transformed> {
-		return FilterDocument(base: self, { predicate($0) })
-	}
-
-	@inlinable @inline(__always)
-	public func compactMap<OtherTransformed>(
-		_ transform: @escaping (Transformed) -> OtherTransformed?
-	) -> CompactMapDocument<Self, OtherTransformed>
-	where OtherTransformed: Markdown.Markup {
-		return CompactMapDocument<Self, OtherTransformed>(base: self, { transform($0 as! Transformed) })
 	}
 }

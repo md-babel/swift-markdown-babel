@@ -3,7 +3,7 @@ import Markdown
 /// Forward filter operator.
 ///
 /// Does not actually remove any markup element from the base document, but affects what subsequent operators can access.
-public struct FilterDocument<Base, Element>: Document
+public struct FilterDocument<Base, Element>: Document, DocumentScope
 where Base: Document, Element: Markdown.Markup {
 	public let base: Base
 	public let predicate: (Element) -> Bool
