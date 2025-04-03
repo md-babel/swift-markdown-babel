@@ -20,3 +20,10 @@ where Base: Document {
 		})
 	}
 }
+
+extension Document {
+	@inlinable @inline(__always)
+	public func filter(_ predicate: @escaping (AnyElement) -> Bool) -> some Document {
+		return AnyFilterDocument(base: self, predicate)
+	}
+}

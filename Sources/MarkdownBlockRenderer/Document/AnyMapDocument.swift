@@ -17,3 +17,10 @@ where Base: Document {
 		base.markdown(visitor: { transform($0).flatMap(visitor) })
 	}
 }
+
+extension Document {
+	@inlinable @inline(__always)
+	public func map(_ transform: @escaping (AnyElement) -> AnyElement?) -> some Document {
+		return AnyMapDocument(base: self, transform)
+	}
+}
