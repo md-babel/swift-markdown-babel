@@ -3,9 +3,12 @@
 import PackageDescription
 
 let package = Package(
-	name: "MarkdownBlockRenderer",
+	name: "swift-markdown-babel",
 	platforms: [
 		.macOS(.v14)
+	],
+	products: [
+		.library(name: "MarkdownBlockRenderer", targets: ["MarkdownBlockRenderer"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
