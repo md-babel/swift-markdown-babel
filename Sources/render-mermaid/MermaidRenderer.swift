@@ -2,6 +2,27 @@ import Foundation
 import Markdown
 import MarkdownBlockRenderer
 
+public struct CustomFormatter: Markdown.MarkupWalker {
+	private var baseFormatter: Markdown.MarkupFormatter
+	public var result: String { baseFormatter.result }
+
+	public init(baseFormatter: MarkupFormatter) {
+		self.baseFormatter = baseFormatter
+	}
+
+	public mutating func defaultVisit(_ markup: any Markup) {
+		baseFormatter.visit(markup)
+	}
+
+	public mutating func visitCustomBlock(_ customBlock: CustomBlock) {
+		descendInto(customBlock)
+	}
+
+	public mutating func visitDocument(_ document: Markdown.Document) {
+		descendInto(document)
+	}
+}
+
 struct MermaidRenderer {
 	let mermaidPath: String
 	let document: MarkdownDocument
@@ -81,18 +102,25 @@ struct MermaidRenderer {
 			}
 		}
 
-		var files: [URL] = []
-		_ =
-			try document
+		let newDocument =
+			/*try*/
+		document
 			.compactMap { $0 as? Markdown.CodeBlock }
 			.filter { $0.language?.lowercased() == "mermaid" }
-			.do { (codeBlock: Markdown.CodeBlock) in  // -> Markdown.CustomBlock in
-				let file = try renderer.render(codeBlock, \Markdown.CodeBlock.code)
-				files.append(file)
-				let commentBlock = Markdown.Paragraph(Markdown.Text("Test"))
-				// return Markdown.CustomBlock(codeBlock, commentBlock)
+			.map { (codeBlock: Markdown.CodeBlock) -> CustomBlock in
+				let file = try! renderer.render(codeBlock, \Markdown.CodeBlock.code)
+				return CustomBlock(
+					codeBlock,
+					Paragraph(
+						Image(source: file.path(), title: nil)
+					)
+				)
 			}
 			.markdown()
-		print(files)
+
+		var formatter = CustomFormatter(baseFormatter: MarkupFormatter(formattingOptions: .default))
+		formatter.visit(newDocument)
+		let newDocumentString = formatter.result
+		print(newDocumentString)
 	}
 }
