@@ -2,27 +2,6 @@ import Foundation
 import Markdown
 import MarkdownBlockRenderer
 
-public struct CustomFormatter: Markdown.MarkupWalker {
-	private var baseFormatter: Markdown.MarkupFormatter
-	public var result: String { baseFormatter.result }
-
-	public init(baseFormatter: MarkupFormatter) {
-		self.baseFormatter = baseFormatter
-	}
-
-	public mutating func defaultVisit(_ markup: any Markup) {
-		baseFormatter.visit(markup)
-	}
-
-	public mutating func visitCustomBlock(_ customBlock: CustomBlock) {
-		descendInto(customBlock)
-	}
-
-	public mutating func visitDocument(_ document: Markdown.Document) {
-		descendInto(document)
-	}
-}
-
 struct MermaidRenderer {
 	let mermaidPath: String
 	let document: MarkdownDocument
@@ -102,25 +81,76 @@ struct MermaidRenderer {
 			}
 		}
 
-		let newDocument =
-			/*try*/
-		document
+		var deltas: [Delta] = []
+
+		_ =
+			try document
 			.compactMap { $0 as? Markdown.CodeBlock }
 			.filter { $0.language?.lowercased() == "mermaid" }
-			.map { (codeBlock: Markdown.CodeBlock) -> CustomBlock in
-				let file = try! renderer.render(codeBlock, \Markdown.CodeBlock.code)
-				return CustomBlock(
+			.do { (codeBlock: Markdown.CodeBlock) in
+				guard let replacementRange = codeBlock.range
+				else { preconditionFailure("Applying modifications to generated elements") }
+
+				let file = try renderer.render(codeBlock, \Markdown.CodeBlock.code)
+				let delta = Markdown.Document(
 					codeBlock,
 					Paragraph(
 						Image(source: file.path(), title: nil)
 					)
 				)
+
+				deltas.append(Delta(replacementRange: replacementRange, replacementDocument: delta))
 			}
 			.markdown()
 
-		var formatter = CustomFormatter(baseFormatter: MarkupFormatter(formattingOptions: .default))
-		formatter.visit(newDocument)
-		let newDocumentString = formatter.result
-		print(newDocumentString)
+		// MARK: - Insert into UTF-8
+
+		let utf8 = document.string.utf8
+		let lines = utf8.split(omittingEmptySubsequences: false, whereSeparator: isNewline(_:))
+
+		func toUTF8(_ sourceLocation: SourceLocation) -> String.UTF8View.Index {
+			// TODO: reuse and advance the previous iteration's index to make this O(n), not O(n*n*2)
+			let lineIndex = lines[sourceLocation.line - 1].startIndex
+			return utf8.index(lineIndex, offsetBy: sourceLocation.column - 1)
+		}
+
+		var applicableDeltas: [ApplicableDelta] = []
+		for delta in deltas {
+			// TODO: reuse and advance the previous iteration's index to make this O(n), not O(n*n)
+			let utf8Range: Range<String.UTF8View.Index> =
+				(toUTF8(delta.replacementRange.lowerBound)..<toUTF8(delta.replacementRange.upperBound))
+			let applicable = ApplicableDelta(delta: delta, utf8Range: utf8Range)
+			applicableDeltas.append(applicable)
+		}
+
+		var newString = document.string
+		for applicableDelta
+			in applicableDeltas
+			.sorted(by: { $0.utf8Range.lowerBound < $1.utf8Range.lowerBound })
+			.reversed()
+		{
+			let renderedString = applicableDelta.delta.replacementDocument.format(options: .default)
+			// TODO: replace this very costly range conversion
+			print(applicableDelta.utf8Range)
+			let stringRange =
+				applicableDelta.utf8Range.lowerBound.samePosition(in: document.string)!..<applicableDelta.utf8Range
+				.upperBound.samePosition(in: document.string)!
+			newString.replaceSubrange(stringRange, with: renderedString)
+		}
+		print(newString)
 	}
+}
+
+struct Delta {
+	let replacementRange: Markdown.SourceRange
+	let replacementDocument: Markdown.Document
+}
+
+struct ApplicableDelta {
+	let delta: Delta
+	let utf8Range: Range<String.UTF8View.Index>
+}
+
+func isNewline(_ codeUnit: String.UTF8View.Element) -> Bool {
+	return codeUnit == String.UTF8View.Element(ascii: "\n") || codeUnit == String.UTF8View.Element(ascii: "\r")
 }
