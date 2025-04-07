@@ -2,15 +2,17 @@ import Markdown
 
 public struct ExecutableContext {
 	public struct Result {
-		public let markup: any Markdown.Markup
+		public let range: Markdown.SourceRange
 		public let header: String
-		public let content: String
+		public let contentMarkup: Markdown.CodeBlock
+		public var content: String { contentMarkup.code }
 	}
 
 	public struct Error {
-		public let markup: any Markdown.Markup
+		public let range: Markdown.SourceRange
 		public let header: String
-		public let content: String
+		public let contentMarkup: Markdown.CodeBlock
+		public var content: String { contentMarkup.code }
 	}
 
 	public let codeBlock: Markdown.CodeBlock
@@ -61,11 +63,12 @@ extension ExecutableContext.Result: CustomDebugStringConvertible {
 		}
 
 		return """
+			» Range: \(range)
 			» Header: “\(header)”
 			» Content:
 			\(indent(content))
-			» Markup:
-			\(indent(markup.debugDescription(options: options)))
+			» Content markup:
+			\(indent(contentMarkup.debugDescription(options: options)))
 			"""
 	}
 }
@@ -86,11 +89,12 @@ extension ExecutableContext.Error: CustomDebugStringConvertible {
 		}
 
 		return """
+			» Range: \(range)
 			» Header: “\(header)”
 			» Content:
 			\(indent(content))
-			» Markup:
-			\(indent(markup.debugDescription(options: options)))
+			» Content markup:
+			\(indent(contentMarkup.debugDescription(options: options)))
 			"""
 	}
 }

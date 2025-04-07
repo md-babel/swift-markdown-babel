@@ -229,10 +229,11 @@ extension ExecutableContext {
 				├─ CodeBlock @3:1-5:4 language: sh
 				│  date
 				Result:
+				» Range: 7:1..<10:4
 				» Header: “Result:”
 				» Content:
 				  Mon Apr  7 08:40:38 CEST 2025
-				» Markup:
+				» Content markup:
 				  ├─ CodeBlock @8:1-10:4 language: none
 				  │  Mon Apr  7 08:40:38 CEST 2025
 				Error:
@@ -258,10 +259,11 @@ extension ExecutableContext {
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
+					» Range: 7:1..<10:4
 					» Header: “Result:”
 					» Content:
 					  Mon Apr  7 08:40:38 CEST 2025
-					» Markup:
+					» Content markup:
 					  ├─ CodeBlock @8:1-10:4 language: none
 					  │  Mon Apr  7 08:40:38 CEST 2025
 					Error:
@@ -294,10 +296,11 @@ extension ExecutableContext {
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
+					» Range: 7:1..<10:4
 					» Header: “Result:”
 					» Content:
 					  First of two results shadows the next
-					» Markup:
+					» Content markup:
 					  ├─ CodeBlock @8:1-10:4 language: none
 					  │  First of two results shadows the next
 					Error:
@@ -330,17 +333,19 @@ extension ExecutableContext {
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
+					» Range: 7:1..<10:4
 					» Header: “Result:”
 					» Content:
 					  Mon Apr  7 10:51:55 CEST 2025
-					» Markup:
+					» Content markup:
 					  ├─ CodeBlock @8:1-10:4 language: none
 					  │  Mon Apr  7 10:51:55 CEST 2025
 					Error:
+					» Range: 12:1..<15:4
 					» Header: “Error:”
 					» Content:
 					  You are too slow!
-					» Markup:
+					» Content markup:
 					  ├─ CodeBlock @13:1-15:4 language: none
 					  │  You are too slow!
 					"""
@@ -399,10 +404,11 @@ extension ExecutableContext {
 				Result:
 				(No Result)
 				Error:
+				» Range: 7:1..<10:4
 				» Header: “Error:”
 				» Content:
 				  You are too slow!
-				» Markup:
+				» Content markup:
 				  ├─ CodeBlock @8:1-10:4 language: none
 				  │  You are too slow!
 				"""

@@ -6,26 +6,30 @@ extension MarkdownDocument {
 		let result = { () -> ExecutableContext.Result? in
 			guard let htmlBlock = codeBlockAtLocation.nextSibling() as? Markdown.HTMLBlock,
 				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
+				let commentBlockRange = commentBlock.range,
 				commentBlock.commentedText.hasPrefix("Result:"),
-				let resultCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock
+				let resultCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
+				let resultCodeBlockRange = resultCodeBlock.range
 			else { return nil }
 			return ExecutableContext.Result(
-				markup: resultCodeBlock,
+				range: commentBlockRange.lowerBound..<resultCodeBlockRange.upperBound,
 				header: commentBlock.commentedText,
-				content: resultCodeBlock.code
+				contentMarkup: resultCodeBlock
 			)
 		}()
 		let error = { () -> ExecutableContext.Error? in
-			let referenceBlock = result?.markup ?? codeBlockAtLocation
+			let referenceBlock = result?.contentMarkup ?? codeBlockAtLocation
 			guard let htmlBlock = referenceBlock.nextSibling() as? Markdown.HTMLBlock,
 				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
+				let commentBlockRange = commentBlock.range,
 				commentBlock.commentedText.hasPrefix("Error:"),
-				let errorCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock
+				let errorCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
+				let errorCodeBlockRange = errorCodeBlock.range
 			else { return nil }
 			return ExecutableContext.Error(
-				markup: errorCodeBlock,
+				range: commentBlockRange.lowerBound..<errorCodeBlockRange.upperBound,
 				header: commentBlock.commentedText,
-				content: errorCodeBlock.code
+				contentMarkup: errorCodeBlock
 			)
 		}()
 
