@@ -65,6 +65,14 @@ func format(_ range: SourceRange) -> String {
 	"{ \"from\": \(format(range.lowerBound)), \"to\": \(format(range.upperBound)) }"
 }
 
+func sanitize(_ string: String) -> String {
+	return
+		string
+		.trimmingCharacters(in: .newlines)
+		.replacing("\n", with: "\\n")
+		.replacing("\r", with: "\\r")
+}
+
 func format(_ markup: CodeBlock) -> String {
 	return [
 		"{",
@@ -73,7 +81,7 @@ func format(_ markup: CodeBlock) -> String {
 			"\"range\": \(format(markup.range!))",
 			"\"type\": \"code_block\"",
 			"\"language\": \"\(markup.language ?? "")\"",
-			"\"content\": \"\(markup.code.trimmingCharacters(in: .newlines))\"",
+			"\"content\": \"\(sanitize(markup.code))\"",
 			separator: ",\n"
 		),
 		"  }",
@@ -89,7 +97,7 @@ func format(_ result: ExecutableContext.Result) -> String {
 			"\"header\": \(result.header)",
 			"\"type\": \"code_block\"",
 			"\"language\": \"\(result.contentMarkup.language ?? "")\"",
-			"\"content\": \"\(result.content.trimmingCharacters(in: .newlines))\"",
+			"\"content\": \"\(sanitize(result.content))\"",
 			separator: ",\n"
 		),
 		"  }",
@@ -105,7 +113,7 @@ func format(_ error: ExecutableContext.Error) -> String {
 			"\"header\": \(error.header)",
 			"\"type\": \"code_block\"",
 			"\"language\": \"\(error.contentMarkup.language ?? "")\"",
-			"\"content\": \"\(error.content.trimmingCharacters(in: .newlines))\"",
+			"\"content\": \"\(sanitize(error.content))\"",
 			separator: ",\n"
 		),
 		"  }",
