@@ -26,9 +26,18 @@ struct Select: ParsableCommand {
 
 	// MARK: - Location
 
-	// TODO: Transform i>=1
-	@Option var line: Int
-	@Option var column: Int
+	@Option(
+		name: .shortAndLong,
+		help: "Line position of the insertion point in file. (1-based)",
+		transform: positiveNonZero(_:)
+	)
+	var line: Int
+	@Option(
+		name: .shortAndLong,
+		help: "Column position of the insertion point in file at line. (1-based)",
+		transform: positiveNonZero(_:)
+	)
+	var column: Int
 
 	func sourceLocation() throws -> Markdown.SourceLocation {
 		Markdown.SourceLocation(line: line, column: column, source: inputFile)

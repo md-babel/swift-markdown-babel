@@ -30,6 +30,10 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			]
 		),
+		.testTarget(
+			name: "md-babel-tests",
+			dependencies: [.target(name: "md-babel")]
+		),
 		.executableTarget(
 			name: "render-mermaid",
 			dependencies: [
