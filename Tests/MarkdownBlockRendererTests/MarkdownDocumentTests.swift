@@ -167,5 +167,43 @@ extension ExecutableContext {
 				#expect(document.executableContext(at: location)?.dump() == expectedDump)
 			}
 		}
+
+		@Suite("in code block with result") struct CodeBlockWithResultOnly {
+			let document = MarkdownDocument(
+				parsing: """
+					before
+
+					```sh
+					date
+					```
+
+					<!--Result:-->
+					```
+					Mon Apr  7 08:40:38 CEST 2025
+					```
+
+					after
+					"""
+			)
+
+			@Test func returnsCodeBlockOnly() {
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					» Header: “Result:”
+					» Content:
+					  Mon Apr  7 08:40:38 CEST 2025
+					» Markup:
+					  ├─ CodeBlock @8:1-10:4 language: none
+					  │  Mon Apr  7 08:40:38 CEST 2025
+					Error:
+					(No Error)
+					"""
+				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			}
+		}
 	}
 }
