@@ -8,6 +8,12 @@ extension Markdown.Markup {
 	}
 }
 
+extension ExecutableContext {
+	func dump() -> String {
+		return debugDescription(options: .printSourceLocations)
+	}
+}
+
 @Suite struct MarkdownDocumentTests {
 	@Suite("markup at location") struct MarkupAtLocation {
 		@Suite("in an empty document") struct EmptyDocument {
@@ -128,6 +134,38 @@ extension Markdown.Markup {
 				└─ Text @6:31-6:37 "quotes"
 				"""
 			#expect(document.markup(at: location)?.dump() == expectedDump)
+		}
+	}
+
+	@Suite("executable context at location") struct ExecutableContextAtLocation {
+		@Suite("in code block without context") struct CodeBlockOnly {
+			let document = MarkdownDocument(
+				parsing: """
+					before
+
+					```agda
+					η-× : ∀ {A B : Set} (w : A × B) → ⟨ proj₁ w , proj₂ w ⟩ ≡ w
+					η-× w = refl
+					```
+
+					after
+					"""
+			)
+
+			@Test func returnsCodeBlockOnly() {
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-6:4 language: agda
+					│  η-× : ∀ {A B : Set} (w : A × B) → ⟨ proj₁ w , proj₂ w ⟩ ≡ w
+					│  η-× w = refl
+					Result:
+					(No Result)
+					Error:
+					(No Error)
+					"""
+				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			}
 		}
 	}
 }
