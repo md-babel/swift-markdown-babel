@@ -8,7 +8,7 @@ let package = Package(
 		.macOS(.v14)
 	],
 	products: [
-		.library(name: "MarkdownBlockRenderer", targets: ["MarkdownBlockRenderer"])
+		.executable(name: "md-babel", targets: ["md-babel"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
@@ -21,6 +21,15 @@ let package = Package(
 				.product(name: "Markdown", package: "swift-markdown")
 			]
 		),
+		.testTarget(name: "MarkdownBlockRendererTests", dependencies: [.target(name: "MarkdownBlockRenderer")]),
+
+		.executableTarget(
+			name: "md-babel",
+			dependencies: [
+				.target(name: "MarkdownBlockRenderer"),
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+			]
+		),
 		.executableTarget(
 			name: "render-mermaid",
 			dependencies: [
@@ -28,6 +37,5 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			]
 		),
-		.testTarget(name: "MarkdownBlockRendererTests", dependencies: [.target(name: "MarkdownBlockRenderer")]),
 	]
 )
