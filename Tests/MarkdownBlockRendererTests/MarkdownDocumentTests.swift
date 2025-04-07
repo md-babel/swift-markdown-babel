@@ -206,4 +206,42 @@ extension ExecutableContext {
 			}
 		}
 	}
+
+	@Suite("in code block with error") struct CodeBlockWithResultOnly {
+		let document = MarkdownDocument(
+			parsing: """
+				before
+
+				```sh
+				date
+				```
+
+				<!--Error:-->
+				```
+				Clock not found
+				```
+
+				after
+				"""
+		)
+
+		@Test func returnsCodeBlockWithErrorOnly() {
+			let location = SourceLocation(line: 4, column: 1, source: nil)
+			let expectedDump = """
+				Code:
+				├─ CodeBlock @3:1-5:4 language: sh
+				│  date
+				Result:
+				(No Result)
+				Error:
+				» Header: “Error:”
+				» Content:
+				  Clock not found
+				» Markup:
+				  ├─ CodeBlock @8:1-10:4 language: none
+				  │  Clock not found
+				"""
+			#expect(document.executableContext(at: location)?.dump() == expectedDump)
+		}
+	}
 }

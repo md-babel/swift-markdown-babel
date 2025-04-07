@@ -6,25 +6,6 @@ extension MarkdownDocument {
 		self.document.accept(&walker)
 		return walker.match
 	}
-
-	public func executableContext(at sourceLocation: Markdown.SourceLocation) -> ExecutableContext? {
-		guard let codeBlockAtLocation = markup(at: sourceLocation) as? Markdown.CodeBlock else { return nil }
-
-		return ExecutableContext(
-			codeBlock: codeBlockAtLocation,
-			result: { () -> ExecutableContext.Result? in
-				guard let htmlBlock = codeBlockAtLocation.nextSibling() as? Markdown.HTMLBlock,
-					let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
-					let resultCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock
-				else { return nil }
-				return ExecutableContext.Result(
-					markup: resultCodeBlock,
-					header: commentBlock.commentedText,
-					content: resultCodeBlock.code
-				)
-			}()
-		)
-	}
 }
 
 private struct LeafMarkupAtLocationWalker: Markdown.MarkupWalker {
