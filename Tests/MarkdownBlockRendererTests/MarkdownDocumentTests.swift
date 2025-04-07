@@ -2,6 +2,12 @@ import Markdown
 import MarkdownBlockRenderer
 import Testing
 
+extension Markdown.Markup {
+	func dump() -> String {
+		return debugDescription(options: .printSourceLocations)
+	}
+}
+
 @Suite struct MarkdownDocumentTests {
 	@Suite("markup at location") struct MarkupAtLocation {
 		@Suite("in an empty document") struct EmptyDocument {
@@ -55,7 +61,7 @@ import Testing
 					"""
 					├─ Text @1:1-1:8 "Hello, "
 					"""
-				#expect(document.markup(at: location)?.debugDescription(options: .printSourceLocations) == expectedDump)
+				#expect(document.markup(at: location)?.dump() == expectedDump)
 			}
 
 			@Test(
@@ -70,7 +76,7 @@ import Testing
 					│  ├─ Text @1:9-1:16 "markup "
 					│  └─ InlineCode @1:16-1:23 `world`
 					"""
-				#expect(document.markup(at: location)?.debugDescription(options: .printSourceLocations) == expectedDump)
+				#expect(document.markup(at: location)?.dump() == expectedDump)
 			}
 
 			@Test(
@@ -83,7 +89,7 @@ import Testing
 					"""
 					├─ Text @1:9-1:16 "markup "
 					"""
-				#expect(document.markup(at: location)?.debugDescription(options: .printSourceLocations) == expectedDump)
+				#expect(document.markup(at: location)?.dump() == expectedDump)
 			}
 
 			@Test(
@@ -99,8 +105,29 @@ import Testing
 					"""
 					└─ InlineCode @1:16-1:23 `world`
 					"""
-				#expect(document.markup(at: location)?.debugDescription(options: .printSourceLocations) == expectedDump)
+				#expect(document.markup(at: location)?.dump() == expectedDump)
 			}
+		}
+
+		@Test("deeply nested markup") func deeplyNested() {
+			let document = MarkdownDocument(
+				parsing: """
+					-   List
+					    -   Item
+
+					        > Blockquote
+					        >
+					        > > Deep *nested in **quotes***.
+
+					"""
+			)
+
+			let location = SourceLocation(line: 6, column: 33, source: nil)
+			let expectedDump =
+				"""
+				└─ Text @6:31-6:37 "quotes"
+				"""
+			#expect(document.markup(at: location)?.dump() == expectedDump)
 		}
 	}
 }
