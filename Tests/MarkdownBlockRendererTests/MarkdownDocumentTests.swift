@@ -168,6 +168,39 @@ extension ExecutableContext {
 			}
 		}
 
+		@Suite("in code block followed by comment with unexpected header") struct CodeBlockWithUnsupportedComment {
+			let document = MarkdownDocument(
+				parsing: """
+					before
+
+					```sh
+					date
+					```
+
+					<!--Whatever:-->
+					```
+					Should not match
+					```
+
+					after
+					"""
+			)
+
+			@Test func returnsCodeBlockOnly() {
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					(No Result)
+					Error:
+					(No Error)
+					"""
+				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			}
+		}
+
 		@Suite("in code block with result") struct CodeBlockWithResultOnly {
 			let document = MarkdownDocument(
 				parsing: """
@@ -186,7 +219,7 @@ extension ExecutableContext {
 					"""
 			)
 
-			@Test func returnsCodeBlockOnly() {
+			@Test func returnsCodeBlockWithResult() {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
 					Code:
@@ -205,43 +238,134 @@ extension ExecutableContext {
 				#expect(document.executableContext(at: location)?.dump() == expectedDump)
 			}
 		}
-	}
 
-	@Suite("in code block with error") struct CodeBlockWithResultOnly {
-		let document = MarkdownDocument(
-			parsing: """
-				before
+		@Suite("in code block with error") struct CodeBlockWithErrorOnly {
+			let document = MarkdownDocument(
+				parsing: """
+					before
 
-				```sh
-				date
-				```
+					```sh
+					date
+					```
 
-				<!--Error:-->
-				```
-				Clock not found
-				```
+					<!--Error:-->
+					```
+					Clock not found
+					```
 
-				after
-				"""
-		)
+					after
+					"""
+			)
 
-		@Test func returnsCodeBlockWithErrorOnly() {
-			let location = SourceLocation(line: 4, column: 1, source: nil)
-			let expectedDump = """
-				Code:
-				├─ CodeBlock @3:1-5:4 language: sh
-				│  date
-				Result:
-				(No Result)
-				Error:
-				» Header: “Error:”
-				» Content:
-				  Clock not found
-				» Markup:
-				  ├─ CodeBlock @8:1-10:4 language: none
-				  │  Clock not found
-				"""
-			#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			@Test func returnsCodeBlockWithErrorOnly() {
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					(No Result)
+					Error:
+					» Header: “Error:”
+					» Content:
+					  Clock not found
+					» Markup:
+					  ├─ CodeBlock @8:1-10:4 language: none
+					  │  Clock not found
+					"""
+				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			}
+		}
+
+		@Suite("in code block with result first, then error") struct CodeBlockWithResultFirstThenError {
+			let document = MarkdownDocument(
+				parsing: """
+					before
+
+					```sh
+					date
+					```
+
+					<!--Result:-->
+					```
+					Mon Apr  7 10:51:55 CEST 2025
+					```
+
+					<!--Error:-->
+					```
+					You are too slow!
+					```
+
+					after
+					"""
+			)
+
+			@Test func returnsCodeBlockWithResultAndError() {
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					» Header: “Result:”
+					» Content:
+					  Mon Apr  7 10:51:55 CEST 2025
+					» Markup:
+					  ├─ CodeBlock @8:1-10:4 language: none
+					  │  Mon Apr  7 10:51:55 CEST 2025
+					Error:
+					» Header: “Error:”
+					» Content:
+					  You are too slow!
+					» Markup:
+					  ├─ CodeBlock @13:1-15:4 language: none
+					  │  You are too slow!
+					"""
+				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			}
+		}
+
+		@Suite("in code block with error first, then result") struct CodeBlockWithErrorFirstThenResult {
+			let document = MarkdownDocument(
+				parsing: """
+					before
+
+					```sh
+					date
+					```
+
+					<!--Error:-->
+					```
+					You are too slow!
+					```
+
+					<!--Result:-->
+					```
+					Mon Apr  7 10:51:55 CEST 2025
+					```
+
+					after
+					"""
+			)
+
+			@Test func returnsCodeBlockWithErrorOnly() {
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					(No Result)
+					Error:
+					» Header: “Error:”
+					» Content:
+					  You are too slow!
+					» Markup:
+					  ├─ CodeBlock @8:1-10:4 language: none
+					  │  You are too slow!
+					"""
+				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			}
 		}
 	}
 }

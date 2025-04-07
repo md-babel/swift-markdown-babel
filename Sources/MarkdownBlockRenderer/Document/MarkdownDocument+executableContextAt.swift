@@ -19,6 +19,7 @@ extension MarkdownDocument {
 			let referenceBlock = result?.markup ?? codeBlockAtLocation
 			guard let htmlBlock = referenceBlock.nextSibling() as? Markdown.HTMLBlock,
 				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
+				commentBlock.commentedText.hasPrefix("Error:"),
 				let errorCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock
 			else { return nil }
 			return ExecutableContext.Error(
