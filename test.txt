@@ -2,6 +2,23 @@
 
 Text.
 
+```sh
+date
+```
+
+<!--Result:-->
+```
+Mon Apr  7 12:27:46 CEST 2025
+```
+
+<!--Error:-->
+```
+Wait --
+
+You should be having dinner!
+```
+
+
 ```mermaid
 graph TD;
 A-->B;
