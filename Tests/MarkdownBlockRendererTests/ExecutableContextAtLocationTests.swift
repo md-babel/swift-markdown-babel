@@ -1,3 +1,4 @@
+import Foundation
 import Markdown
 import MarkdownBlockRenderer
 import Testing
@@ -6,6 +7,27 @@ extension ExecutableContext {
 	func dump() -> String {
 		return debugDescription(options: .printSourceLocations)
 	}
+}
+
+func range(
+	from lineFrom: Int,
+	_ columnFrom: Int,
+	_ sourceFrom: URL? = nil,
+	to lineTo: Int,
+	_ columnTo: Int,
+	_ sourceTo: URL? = nil
+) -> SourceRange {
+	let fromLocation = SourceLocation(
+		line: lineFrom,
+		column: columnFrom,
+		source: sourceFrom
+	)
+	let toLocation = SourceLocation(
+		line: lineTo,
+		column: columnTo,
+		source: sourceTo
+	)
+	return fromLocation..<toLocation
 }
 
 @Suite("ExecutableContext at location") struct ExecutableContextAtLocation {
@@ -44,7 +66,7 @@ extension ExecutableContext {
 				"""
 		)
 
-		@Test func returnsCodeBlockOnly() {
+		@Test func returnsCodeBlockOnly() throws {
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
 				Code:
@@ -56,7 +78,9 @@ extension ExecutableContext {
 				Error:
 				(No Error)
 				"""
-			#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			let result = try #require(document.executableContext(at: location))
+			#expect(result.encompassingRange == range(from: 3, 1, to: 6, 4))
+			#expect(result.dump() == expectedDump)
 		}
 	}
 
@@ -70,7 +94,7 @@ extension ExecutableContext {
 				"""
 		)
 
-		@Test func returnsCodeBlockOnly() {
+		@Test func returnsCodeBlockOnly() throws {
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
 				Code:
@@ -81,7 +105,9 @@ extension ExecutableContext {
 				Error:
 				(No Error)
 				"""
-			#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			let result = try #require(document.executableContext(at: location))
+			#expect(result.encompassingRange == range(from: 3, 1, to: 5, 4))
+			#expect(result.dump() == expectedDump)
 		}
 	}
 
@@ -93,7 +119,7 @@ extension ExecutableContext {
 			```
 			"""
 
-		@Test func returnsCodeBlockWithResult() {
+		@Test func returnsCodeBlockWithResult() throws {
 			let document = makeDocument(followCodeWithBlock: Self.resultBlock)
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
@@ -111,11 +137,13 @@ extension ExecutableContext {
 				Error:
 				(No Error)
 				"""
-			#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			let result = try #require(document.executableContext(at: location))
+			#expect(result.encompassingRange == range(from: 3, 1, to: 10, 4))
+			#expect(result.dump() == expectedDump)
 		}
 
 		@Suite("followed by unsupported block") struct ThenUnsupportedBlock {
-			@Test func returnsCodeBlockWithResult() {
+			@Test func returnsCodeBlockWithResult() throws {
 				let document = makeDocument(
 					followCodeWithBlock: CodeBlockWithResultFirst.resultBlock,
 					andThen: """
@@ -141,7 +169,9 @@ extension ExecutableContext {
 					Error:
 					(No Error)
 					"""
-				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+				let result = try #require(document.executableContext(at: location))
+				#expect(result.encompassingRange == range(from: 3, 1, to: 10, 4))
+				#expect(result.dump() == expectedDump)
 			}
 		}
 
@@ -161,7 +191,7 @@ extension ExecutableContext {
 					"""
 			)
 
-			@Test func returnsCodeBlockWithResult() {
+			@Test func returnsCodeBlockWithResult() throws {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
 					Code:
@@ -178,7 +208,9 @@ extension ExecutableContext {
 					Error:
 					(No Error)
 					"""
-				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+				let result = try #require(document.executableContext(at: location))
+				#expect(result.encompassingRange == range(from: 3, 1, to: 10, 4))
+				#expect(result.dump() == expectedDump)
 			}
 		}
 
@@ -198,7 +230,7 @@ extension ExecutableContext {
 					"""
 			)
 
-			@Test func returnsCodeBlockWithResultAndError() {
+			@Test func returnsCodeBlockWithResultAndError() throws {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
 					Code:
@@ -221,7 +253,9 @@ extension ExecutableContext {
 					  ├─ CodeBlock @13:1-15:4 language: none
 					  │  You are too slow!
 					"""
-				#expect(document.executableContext(at: location)?.dump() == expectedDump)
+				let result = try #require(document.executableContext(at: location))
+				#expect(result.encompassingRange == range(from: 3, 1, to: 15, 4))
+				#expect(result.dump() == expectedDump)
 			}
 		}
 	}
@@ -257,7 +291,7 @@ extension ExecutableContext {
 				```
 				""",
 			]
-		) func returnsCodeBlockWithErrorOnly(secondBlock: String) {
+		) func returnsCodeBlockWithErrorOnly(secondBlock: String) throws {
 			let document = makeDocument(
 				followCodeWithBlock: """
 					<!--Error:-->
@@ -284,7 +318,9 @@ extension ExecutableContext {
 				  ├─ CodeBlock @8:1-10:4 language: none
 				  │  You are too slow!
 				"""
-			#expect(document.executableContext(at: location)?.dump() == expectedDump)
+			let result = try #require(document.executableContext(at: location))
+			#expect(result.encompassingRange == range(from: 3, 1, to: 10, 4))
+			#expect(result.dump() == expectedDump)
 		}
 	}
 }
