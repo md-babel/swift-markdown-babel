@@ -1,7 +1,7 @@
 import Markdown
 
 /// Transparently decorates a `HTMLBlock` (to not interfere with tree traversal) to guarantee that the `HTMLBlock` consists of a single `<!--...-->` comment.
-public struct HTMLCommentBlock: Markdown.Markup {
+public struct HTMLCommentBlock: Markdown.BlockMarkup {
 	public static let opener = "<!--"
 	public static let closer = "-->"
 
