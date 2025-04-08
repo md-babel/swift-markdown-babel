@@ -3,13 +3,7 @@ name: CI
 permissions:
   contents: read
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 env:
   CLICOLOR: 1
