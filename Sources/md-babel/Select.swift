@@ -43,6 +43,8 @@ struct Select: ParsableCommand {
 		Markdown.SourceLocation(line: line, column: column, source: inputFile)
 	}
 
+	// MARK: - Run
+
 	func run() throws {
 		let document = try markdownDocument()
 		let location = try sourceLocation()

@@ -4,11 +4,11 @@ import Markdown
 import MarkdownBlockRenderer
 
 @main
-struct MarkdownBabel: ParsableCommand {
+struct MarkdownBabel: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "md-babel",
 		// abstract: String, usage: String?, discussion: String, version: String, shouldDisplay: Bool,
-		subcommands: [Select.self],
+		subcommands: [Select.self, Execute.self],
 		defaultSubcommand: nil
 	)
 }

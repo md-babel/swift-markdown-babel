@@ -19,11 +19,23 @@ public struct ExecutableContext {
 	public let result: Result?
 	public let error: Error?
 
+	public var encompassingRange: Markdown.SourceRange {
+		let codeBlockRange = codeBlock.range!
+		let lowerBound = codeBlockRange.lowerBound
+		let upperBound = max(
+			(result?.range.upperBound ?? codeBlockRange.upperBound),
+			(error?.range.upperBound ?? codeBlockRange.upperBound),
+			codeBlockRange.upperBound
+		)
+		return lowerBound..<upperBound
+	}
+
 	public init(
 		codeBlock: CodeBlock,
 		result: Result? = nil,
 		error: Error? = nil
 	) {
+		precondition(codeBlock.range != nil, "CodeBlock needs to come from a document and have a range")
 		self.codeBlock = codeBlock
 		self.result = result
 		self.error = error
