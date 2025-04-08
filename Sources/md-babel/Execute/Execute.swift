@@ -58,7 +58,9 @@ struct Execute: AsyncParsableCommand {
 			return  // TODO: throw error? produce not-found response?
 		}
 		// TODO: Escalate hydrading configurations from ~/.config/ and ~/Library/Application Support/ and local path and --config parameter, and offer --no-user-config to skip shared config completely.
-		let registry = ExecutableRegistry(configurations: [:])
+		let registry = ExecutableRegistry(configurations: [
+			"sh": .init(executableURL: URL(fileURLWithPath: "/usr/bin/env"), arguments: ["sh"])
+		])
 		let executionResult: ExecutionResult = await {
 			do {
 				let executable = try registry.executable(forCodeBlock: context.codeBlock)
