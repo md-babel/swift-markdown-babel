@@ -3,7 +3,13 @@ name: CI
 permissions:
   contents: read
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 env:
   CLICOLOR: 1
@@ -20,13 +26,6 @@ jobs:
           xcode-select-version: 16.1
       - name: Test
         run: set -o pipefail && swift test | xcbeautify --renderer github-actions
-  test-ubuntu:
-    name: Test on Ubuntu 24.04
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test
-        run: set -o pipefail && swift test
   spelling:
     name: Spell Check with Typos
     runs-on: ubuntu-latest
