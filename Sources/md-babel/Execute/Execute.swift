@@ -114,9 +114,9 @@ func format(
 			indentation: 1,
 			"\"range\": \(format(location ..< location))",
 			"\"replacementRange\": \(format(executableContext.encompassingRange))",
-			"\"replacementString\": \(renderedString)",
-			executionResult.output.map(sanitize(_:)).map { #""result": "# + $0 },
-			executionResult.error.map(sanitize(_:)).map { #""error": "# + $0 },
+			"\"replacementString\": \"\(sanitize(renderedString))\"",
+			executionResult.output.map(sanitize(_:)).map { "\"result\": \"\($0)\"" },
+			executionResult.error.map(sanitize(_:)).map { "\"error\": \"\($0)\"" },
 			separator: ",\n"
 		),
 		"}",
