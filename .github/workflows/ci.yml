@@ -1,19 +1,5 @@
 name: CI
 
-permissions:
-  contents: read
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-env:
-  CLICOLOR: 1
-
 jobs:
   test-macos:
     name: Test on macOS 14
