@@ -252,7 +252,8 @@ struct RunProcess {
 }
 
 extension RunProcess {
-	// - Precondition: Must be run on the main queue.
+	/// - Precondition: Must be run on the main queue.
+	@MainActor
 	func callAsFunction(
 		input data: Data,
 		additionalArguments: [String] = []
@@ -269,7 +270,8 @@ extension RunProcess {
 		}
 	}
 
-	// - Precondition: Must be run on the main queue.
+	/// - Precondition: Must be run on the main queue.
+	@MainActor
 	func callAsFunction(
 		input string: String,
 		additionalArguments: [String] = []
