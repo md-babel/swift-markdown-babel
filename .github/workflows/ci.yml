@@ -1,0 +1,36 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CLICOLOR: 1
+
+jobs:
+  test-macos:
+    name: Test on macOS 14
+    runs-on: macOS-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode Select Version
+        uses: mobiledevops/xcode-select-version-action@v1
+        with:
+          xcode-select-version: 16.1
+      - name: Test
+        run: set -o pipefail && swift test | xcbeautify --renderer github-actions
+  spelling:
+    name: Spell Check with Typos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions Repository
+        uses: actions/checkout@v4
+      - name: Spell Check Repo
+        uses: crate-ci/typos@v1.31.1
