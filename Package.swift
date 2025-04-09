@@ -11,6 +11,7 @@ let package = Package(
 		.executable(name: "md-babel", targets: ["md-babel"])
 	],
 	dependencies: [
+		.package(url: "https://github.com/apple/swift-crypto.git", "1.0.0"..<"4.0.0"),  // CryptoKit drop-in replacement for hashing
 		.package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
 	],
@@ -18,7 +19,8 @@ let package = Package(
 		.target(
 			name: "MarkdownBlockRenderer",
 			dependencies: [
-				.product(name: "Markdown", package: "swift-markdown")
+				.product(name: "Markdown", package: "swift-markdown"),
+				.product(name: "Crypto", package: "swift-crypto"),
 			]
 		),
 		.testTarget(name: "MarkdownBlockRendererTests", dependencies: [.target(name: "MarkdownBlockRenderer")]),
