@@ -119,14 +119,14 @@ struct RunProcess {
 		}
 
 		do {
-			// If you write to a pipe whose remote end has closed, the OS raises a
-			// `SIGPIPE` signal whose default disposition is to terminate your
-			// process.  Helpful!  `F_SETNOSIGPIPE` disables that feature, causing
-			// the write to fail with `EPIPE` instead.
-
-			let fcntlResult = fcntl(inputPipe.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
-			guard fcntlResult >= 0 else { throw POSIXError(code: errno) }
-
+			#if os(macOS)  // I didn't find a good replacement for Linux
+				// If you write to a pipe whose remote end has closed, the OS raises a
+				// `SIGPIPE` signal whose default disposition is to terminate your
+				// process.  Helpful!  `F_SETNOSIGPIPE` disables that feature, causing
+				// the write to fail with `EPIPE` instead.
+				let fcntlResult = fcntl(inputPipe.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
+				guard fcntlResult >= 0 else { throw POSIXError(code: errno) }
+			#endif
 			// Actually run the process.
 
 			try proc.run()
@@ -163,7 +163,7 @@ struct RunProcess {
 				queue: .main
 			) { _ in
 				// `FileHandle` will automatically close the underlying file
-				// descriptor when you release the last reference to it.  By holidng
+				// descriptor when you release the last reference to it.  By holding
 				// on to `inputPipe` until here, we ensure that doesn’t happen. And
 				// as we have to hold a reference anyway, we might as well close it
 				// explicitly.
