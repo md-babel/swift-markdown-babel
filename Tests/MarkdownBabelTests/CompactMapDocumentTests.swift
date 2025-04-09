@@ -1,5 +1,5 @@
 import Markdown
-import MarkdownBlockRenderer
+import MarkdownBabel
 import Testing
 
 @Suite struct CompactMapDocumentTests {

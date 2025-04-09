@@ -17,31 +17,27 @@ let package = Package(
 	],
 	targets: [
 		.target(
-			name: "MarkdownBlockRenderer",
+			name: "MarkdownBabel",
 			dependencies: [
 				.product(name: "Markdown", package: "swift-markdown"),
 				.product(name: "Crypto", package: "swift-crypto"),
 			]
 		),
-		.testTarget(name: "MarkdownBlockRendererTests", dependencies: [.target(name: "MarkdownBlockRenderer")]),
+		.testTarget(
+			name: "MarkdownBabelTests",
+			dependencies: [.target(name: "MarkdownBabel")]
+		),
 
 		.executableTarget(
 			name: "md-babel",
 			dependencies: [
-				.target(name: "MarkdownBlockRenderer"),
+				.target(name: "MarkdownBabel"),
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			]
 		),
 		.testTarget(
 			name: "md-babel-tests",
 			dependencies: [.target(name: "md-babel")]
-		),
-		.executableTarget(
-			name: "render-mermaid",
-			dependencies: [
-				.target(name: "MarkdownBlockRenderer"),
-				.product(name: "ArgumentParser", package: "swift-argument-parser"),
-			]
 		),
 	]
 )
