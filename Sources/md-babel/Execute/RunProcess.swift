@@ -169,7 +169,7 @@ struct RunProcess {
 				// explicitly.
 				//
 				// We apply the same logic to `readIO` below.
-				try! inputPipe.fileHandleForWriting.close()
+				try? inputPipe.fileHandleForWriting.close()
 			}
 			let inputDD = input.withUnsafeBytes { DispatchData(bytes: $0) }
 			writeIO.write(offset: 0, data: inputDD, queue: .main) { isDone, _, error in
@@ -190,7 +190,7 @@ struct RunProcess {
 				fileDescriptor: outputPipe.fileHandleForReading.fileDescriptor,
 				queue: .main
 			) { _ in
-				try! outputPipe.fileHandleForReading.close()
+				try? outputPipe.fileHandleForReading.close()
 			}
 			readIO.read(offset: 0, length: .max, queue: .main) { isDone, chunkQ, error in
 				outputData.append(contentsOf: chunkQ ?? .empty)
@@ -207,7 +207,7 @@ struct RunProcess {
 			// termination handler is enough to run the notify block and call the
 			// client’s completion handler.
 			errorQ = error
-			proc.terminationHandler!(proc)
+			proc.terminationHandler?(proc)
 		}
 	}
 

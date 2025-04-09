@@ -72,7 +72,7 @@ struct RenderMermaid: AsyncParsableCommand {
 	private func makeTemporaryOutputDirectory() throws -> URL {
 		let tmpDir = FileManager.default.temporaryDirectory
 
-		try! VerboseLogger(isEnabled: self.verbose)
+		try? VerboseLogger(isEnabled: self.verbose)
 			.log("Using temporary directory: “\(tmpDir)”")
 
 		do {
