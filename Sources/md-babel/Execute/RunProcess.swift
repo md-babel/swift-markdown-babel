@@ -139,7 +139,7 @@ struct RunProcess {
 			// have already entered the group for each of the I/O handlers.
 			//
 			// An alternative design would be to enter the group at the top of this
-			// block and then leave it in the error hander.  I decided on this
+			// block and then leave it in the error handler.  I decided on this
 			// design because it has the added benefit of all my code running on the
 			// main queue and thus I can access shared mutable state, like `errorQ`,
 			// without worrying about thread safety.
