@@ -51,4 +51,4 @@ jobs:
         with:
           xcode-select-version: 16.1
       - name: Format and lint
-        run: swift format lint -r -p -s .
+        run: swift format lint --recursive --parallel --strict .
