@@ -22,7 +22,7 @@ struct Execute: AsyncParsableCommand {
 	func markdownDocument() throws -> MarkdownDocument {
 		if let inputFile {
 			return try MarkdownDocument(parsing: inputFile)
-		} else if let string = readLine() {
+		} else if let string = try stringFromStdin() {
 			return MarkdownDocument(parsing: string)
 		} else {
 			// To test this, try to `readLine()` twice; the second one will fail because STDIN has already been emptied.
