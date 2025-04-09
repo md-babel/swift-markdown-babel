@@ -1,7 +1,7 @@
 import ArgumentParser
 import Foundation
 import Markdown
-import MarkdownBlockRenderer
+import MarkdownBabel
 
 @main
 struct MarkdownBabel: AsyncParsableCommand {
