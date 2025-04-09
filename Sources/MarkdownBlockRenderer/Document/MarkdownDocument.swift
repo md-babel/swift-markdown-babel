@@ -23,3 +23,9 @@ public struct MarkdownDocument: Document {
 		return document.markdown { $0 }.markdown()
 	}
 }
+
+extension MarkdownDocument {
+	public func debugDescription(options: Markdown.MarkupDumpOptions = []) -> String {
+		return document.debugDescription(options: options)
+	}
+}
