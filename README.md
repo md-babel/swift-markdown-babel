@@ -12,7 +12,7 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
 
 ### Execute Block
 
-    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--config <config>]
+    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--no-user-config] [--config <config>]
 
 1. Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
 2. execute it in its context,
@@ -25,6 +25,12 @@ See [md-babel.el][] for an implementation in Emacs.
 
 [execute-block-schema]: https://github.com/md-babel/md-babel-schema/tree/main/execute-block
 [md-babel.el]: https://github.com/md-babel/md-babel.el
+
+### Configuration
+
+    Usage: md-babel config dump [--no-user-config] [--config <config>]
+
+Pretty-prints the JSON configuration as found in your global configuration file, merged with `<config>` (if you pass that).
 
 #### Configuration File
 

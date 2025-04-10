@@ -17,6 +17,12 @@ extension ConfigCommand {
 			abstract: "Inspect your effective configuration"
 		)
 
+		@Flag(
+			name: .customLong("no-user-config"),
+			help: "Whether to *not* load the user's global config file."
+		)
+		var isSkippingUserConfig = false
+
 		// MARK: - Config File
 
 		@Option(
@@ -27,12 +33,12 @@ extension ConfigCommand {
 		var configFile: URL?
 
 		func executableRegistry() throws -> ExecutableRegistry {
-			let xdgConfigURL = FileManager.default.homeDirectoryForCurrentUser
-				.appending(path: ".config", directoryHint: .isDirectory)
-				.appending(path: "md-babel", directoryHint: .isDirectory)
-				.appending(path: "config", directoryHint: .notDirectory)
-				.appendingPathExtension("json")
-			let fromXDG = (try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
+			let fromXDG: [String: ExecutableConfiguration] =
+				if isSkippingUserConfig {
+					[:]
+				} else {
+					(try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
+				}
 			let fromFile = try configFile.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
 
 			var configurations: [String: ExecutableConfiguration] = [:]
