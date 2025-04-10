@@ -31,6 +31,3 @@ Client editors can process this to inspect `md-babel` components.
 
 [select-block-schema]: https://github.com/md-babel/md-babel-schema/tree/main/select-block
 
-
-# License
-
