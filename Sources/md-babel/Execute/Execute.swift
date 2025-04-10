@@ -97,7 +97,8 @@ struct Execute: AsyncParsableCommand {
 		}()
 
 		let response = json(location: location, executableContext: context, executionResult: executionResult)
-		FileHandle.standardOutput.write(try response.data())
+		let data = try response.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+		FileHandle.standardOutput.write(data)
 	}
 }
 

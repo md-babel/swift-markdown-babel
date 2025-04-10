@@ -5,16 +5,19 @@ struct ExecutableRegistry {
 }
 
 extension ExecutableRegistry {
-	func configuration(language: String) throws(ExecutionFailure) -> ExecutableConfiguration? {
-		return configurations[language]
+	func configuration(language: String) throws(ExecutionFailure) -> ExecutableConfiguration {
+		guard let configuration = configurations[language]
+		else { throw .configurationMissing(codeLanguage: language) }
+		return configuration
 	}
 
-	func configuration(forCodeBlock codeBlock: Markdown.CodeBlock) throws(ExecutionFailure) -> ExecutableConfiguration {
+	func configuration(
+		forCodeBlock codeBlock: Markdown.CodeBlock
+	) throws(ExecutionFailure) -> ExecutableConfiguration {
 		guard let language = codeBlock.language
 		else { throw .codeBlockWithoutLanguage }
 
-		guard let configuration = try self.configuration(language: language)
-		else { throw .configurationMissing(codeLanguage: language) }
+		let configuration = try self.configuration(language: language)
 
 		return configuration
 	}
