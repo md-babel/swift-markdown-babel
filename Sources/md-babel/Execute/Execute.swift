@@ -74,7 +74,7 @@ struct Execute: AsyncParsableCommand {
 			}
 		}()
 
-		let response = try json(location: location, executableContext: context, executionResult: executionResult)
+		let response = json(location: location, executableContext: context, executionResult: executionResult)
 		FileHandle.standardOutput.write(try response.data())
 	}
 }
@@ -103,7 +103,7 @@ func json(
 	location: SourceLocation,
 	executableContext: ExecutableContext,
 	executionResult: ExecutionResult
-) throws -> JSON {
+) -> JSON {
 	let document = Document(
 		[
 			[executableContext.codeBlock],
@@ -112,16 +112,16 @@ func json(
 		].flatMap { $0 }
 	)
 	let renderedString = document.format()
-	var json: JSON = [
+	var jsonResult: [String: JSON] = [
 		"range": json(location..<location),
 		"replacementRange": json(executableContext.encompassingRange),
 		"replacementString": .string(renderedString),
 	]
 	if let output = executionResult.output {
-		try json.assign("result", to: .string(output))
+		jsonResult["result"] = .string(output)
 	}
 	if let error = executionResult.error {
-		try json.assign("error", to: .string(error))
+		jsonResult["error"] = .string(error)
 	}
-	return json
+	return .object(jsonResult)
 }

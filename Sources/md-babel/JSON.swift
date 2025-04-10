@@ -44,19 +44,3 @@ func json(_ markup: CodeBlock) -> JSON {
 		"content": .string(markup.code),
 	]
 }
-
-func json(context: ExecutableContext?, location: SourceLocation) throws -> JSON {
-	guard let context else { return [:] }
-
-	var jsonResult: JSON = [
-		"range": json(location..<location),
-		"input": json(context.codeBlock),
-	]
-	if let result = context.result {
-		try jsonResult.assign("result", to: json(result))
-	}
-	if let error = context.error {
-		try jsonResult.assign("error", to: json(error))
-	}
-	return jsonResult
-}

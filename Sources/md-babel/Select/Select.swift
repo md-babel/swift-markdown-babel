@@ -1,4 +1,5 @@
 import ArgumentParser
+import DynamicJSON
 import Foundation
 import Markdown
 import MarkdownBabel
@@ -49,7 +50,23 @@ struct Select: ParsableCommand {
 		let document = try markdownDocument()
 		let location = try sourceLocation()
 		let context = document.executableContext(at: location)
-		let response = try json(context: context, location: location)
+		let response = json(context: context, location: location)
 		FileHandle.standardOutput.write(try response.data())
 	}
+}
+
+func json(context: ExecutableContext?, location: SourceLocation) -> JSON {
+	guard let context else { return [:] }
+
+	var jsonResult: [String: JSON] = [
+		"range": json(location..<location),
+		"input": json(context.codeBlock),
+	]
+	if let result = context.result {
+		jsonResult["result"] = json(result)
+	}
+	if let error = context.error {
+		jsonResult["error"] = json(error)
+	}
+	return .object(jsonResult)
 }
