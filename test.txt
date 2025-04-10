@@ -2,18 +2,22 @@
 
 Text.
 
-```elisp
+```sh
 date
 ```
 
 <!--Result:-->
-
 ```
-Wed Apr  9 10:34:17 CEST 2025
+Mon Apr  7 12:27:46 CEST 2025
 ```
 
+<!--Error:-->
+```
+Wait --
 
-Text.
+You should be having dinner!
+```
+
 
 ```mermaid
 graph TD;
