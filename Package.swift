@@ -18,7 +18,7 @@ let package = Package(
 		.target(
 			name: "MarkdownBabel",
 			dependencies: [
-				.product(name: "Markdown", package: "swift-markdown"),
+				.product(name: "Markdown", package: "swift-markdown")
 			]
 		),
 		.testTarget(
