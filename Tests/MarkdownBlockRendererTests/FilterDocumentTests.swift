@@ -30,8 +30,7 @@ import Testing
 		}
 		let result =
 			transformation
-			// Apply downstream visitor to avoid optimizing the filter away completely. Without this, `collectedTexts` would be empty.
-			.markdown(visitor: { $0 })
+			.markdown(visitor: { $0 })  // Apply downstream visitor to avoid optimizing the filter away completely. Without this, `collectedTexts` would be empty.
 			.markdown()
 			.format()
 		let expected =
@@ -61,8 +60,7 @@ import Testing
 		}
 		let result =
 			transformation
-			// Apply downstream visitor to avoid optimizing the filter away completely. Without this, `collectedTexts` would be empty.
-			.markdown(visitor: { $0 })
+			.markdown(visitor: { $0 })  // Apply downstream visitor to avoid optimizing the filter away completely. Without this, `collectedTexts` would be empty.
 			.markdown()
 			.format()
 		let expected =

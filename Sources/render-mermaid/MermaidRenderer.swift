@@ -55,7 +55,7 @@ struct MermaidRenderer {
 			defer {
 				if log.isEnabled {
 					let outputData = stdout.fileHandleForReading.readDataToEndOfFile()
-					try? FileHandle.standardOutput.write(contentsOf: outputData)
+					try! FileHandle.standardOutput.write(contentsOf: outputData)
 				}
 			}
 

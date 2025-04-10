@@ -6,7 +6,7 @@ extension Pipe {
 		let data = try string.data()
 		stdin.fileHandleForWriting.writeabilityHandler = { handle in
 			handle.write(data)
-			try? handle.close()
+			try! handle.close()
 			handle.writeabilityHandler = nil
 		}
 		return stdin
