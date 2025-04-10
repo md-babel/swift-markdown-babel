@@ -50,6 +50,27 @@ struct Execute: AsyncParsableCommand {
 		Markdown.SourceLocation(line: line, column: column, source: inputFile)
 	}
 
+	// MARK: - Config File
+
+	@Option(
+		name: .customLong("config"),
+		help: "Config file path.",
+		transform: { URL(fileURLWithPath: $0) }
+	)
+	var configFile: URL?
+
+	func executableRegistry() throws -> ExecutableRegistry {
+		let configurations: [String: ExecutableConfiguration]
+		if let configFile {
+			let data = try Data(contentsOf: configFile)
+			let json = try JSON(data: data)
+			configurations = try ExecutableConfiguration.configurations(fromJSON: json)
+		} else {
+			configurations = [:]
+		}
+		return ExecutableRegistry(configurations: configurations)
+	}
+
 	// MARK: - Run
 
 	func run() async throws {
@@ -60,10 +81,7 @@ struct Execute: AsyncParsableCommand {
 			FileHandle.standardOutput.write(try JSON.object([:]).data())
 			return
 		}
-		// TODO: Support ExecutableConfiguration from config files. https://github.com/md-babel/swift-markdown-babel/issues/14
-		let registry = ExecutableRegistry(configurations: [
-			"sh": .init(executableURL: URL(fileURLWithPath: "/usr/bin/env"), arguments: ["sh"])
-		])
+		let registry = try executableRegistry()
 		let executionResult: ExecutionResult = await {
 			do {
 				let executable = try registry.executable(forCodeBlock: context.codeBlock)
