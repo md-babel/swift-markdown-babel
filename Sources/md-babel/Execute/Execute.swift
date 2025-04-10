@@ -1,4 +1,5 @@
 import ArgumentParser
+import DynamicJSON
 import Foundation
 import Markdown
 import MarkdownBabel
@@ -73,8 +74,8 @@ struct Execute: AsyncParsableCommand {
 			}
 		}()
 
-		let response = format(location: location, executableContext: context, executionResult: executionResult)
-		FileHandle.standardOutput.write(response.data(using: .utf8)!)
+		let response = json(location: location, executableContext: context, executionResult: executionResult)
+		FileHandle.standardOutput.write(try response.data())
 	}
 }
 
@@ -98,11 +99,11 @@ extension ExecutionResult {
 	}
 }
 
-func format(
+func json(
 	location: SourceLocation,
 	executableContext: ExecutableContext,
 	executionResult: ExecutionResult
-) -> String {
+) -> JSON {
 	let document = Document(
 		[
 			[executableContext.codeBlock],
@@ -111,17 +112,16 @@ func format(
 		].flatMap { $0 }
 	)
 	let renderedString = document.format()
-	return [
-		"{",
-		format(
-			indentation: 1,
-			"\"range\": \(format(location ..< location))",
-			"\"replacementRange\": \(format(executableContext.encompassingRange))",
-			"\"replacementString\": \"\(sanitize(renderedString))\"",
-			executionResult.output.map(sanitize(_:)).map { "\"result\": \"\($0)\"" },
-			executionResult.error.map(sanitize(_:)).map { "\"error\": \"\($0)\"" },
-			separator: ",\n"
-		),
-		"}",
-	].joined(separator: "\n")
+	var jsonResult: [String: JSON] = [
+		"range": json(location..<location),
+		"replacementRange": json(executableContext.encompassingRange),
+		"replacementString": .string(renderedString),
+	]
+	if let output = executionResult.output {
+		jsonResult["result"] = .string(output)
+	}
+	if let error = executionResult.error {
+		jsonResult["error"] = .string(error)
+	}
+	return .object(jsonResult)
 }

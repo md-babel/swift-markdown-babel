@@ -1,4 +1,5 @@
 import ArgumentParser
+import DynamicJSON
 import Foundation
 import Markdown
 import MarkdownBabel
@@ -49,119 +50,23 @@ struct Select: ParsableCommand {
 		let document = try markdownDocument()
 		let location = try sourceLocation()
 		let context = document.executableContext(at: location)
-		print(format(context: context, location: location))
+		let response = json(context: context, location: location)
+		FileHandle.standardOutput.write(try response.data())
 	}
 }
 
-func format(_ location: SourceLocation) -> String {
-	"{ \"line\": \(location.line), \"column\": \(location.column) }"
-}
+func json(context: ExecutableContext?, location: SourceLocation) -> JSON {
+	guard let context else { return [:] }
 
-func format(_ range: SourceRange) -> String {
-	"{ \"from\": \(format(range.lowerBound)), \"to\": \(format(range.upperBound)) }"
-}
-
-func sanitize(_ string: String) -> String {
-	return
-		string
-		.trimmingCharacters(in: .newlines)
-		.replacing("\n", with: "\\n")
-		.replacing("\r", with: "\\r")
-}
-
-func format(_ markup: CodeBlock) -> String {
-	return [
-		"{",
-		format(
-			indentation: 2,
-			"\"range\": \(format(markup.range!))",
-			"\"type\": \"code_block\"",
-			"\"language\": \"\(markup.language ?? "")\"",
-			"\"content\": \"\(sanitize(markup.code))\"",
-			separator: ",\n"
-		),
-		"  }",
-	].joined(separator: "\n")
-}
-
-func format(_ result: ExecutableContext.Result) -> String {
-	return [
-		"{",
-		format(
-			indentation: 2,
-			"\"range\": \(format(result.range))",
-			"\"header\": \(result.header)",
-			"\"type\": \"code_block\"",
-			"\"language\": \"\(result.contentMarkup.language ?? "")\"",
-			"\"content\": \"\(sanitize(result.content))\"",
-			separator: ",\n"
-		),
-		"  }",
-	].joined(separator: "\n")
-}
-
-func format(_ error: ExecutableContext.Error) -> String {
-	return [
-		"{",
-		format(
-			indentation: 2,
-			"\"range\": \(format(error.range))",
-			"\"header\": \(error.header)",
-			"\"type\": \"code_block\"",
-			"\"language\": \"\(error.contentMarkup.language ?? "")\"",
-			"\"content\": \"\(sanitize(error.content))\"",
-			separator: ",\n"
-		),
-		"  }",
-	].joined(separator: "\n")
-}
-
-func format(
-	indentation: Int = 0,
-	lines: [String],
-	separator: String
-) -> String {
-	let indent = (0..<indentation).map { _ in "  " }.joined()
-	return lines.map { indent + $0 }.joined(separator: separator)
-}
-
-func format(
-	indentation: Int = 0,
-	_ lines: String...,
-	separator: String
-) -> String {
-	return format(
-		indentation: indentation,
-		lines: lines.compactMap { $0 },
-		separator: separator
-	)
-}
-
-func format(
-	indentation: Int = 0,
-	_ lines: String?...,
-	separator: String
-) -> String {
-	return format(
-		indentation: indentation,
-		lines: lines.compactMap { $0 },
-		separator: separator
-	)
-}
-
-func format(context: ExecutableContext?, location: SourceLocation) -> String {
-	guard let context else { return "" }
-
-	return [
-		"{",
-		format(
-			indentation: 1,
-			"\"range\": \(format(location ..< location))",
-			"\"input\": \(format(context.codeBlock))",
-			context.result.map(format(_:)).map { #""result": "# + $0 },
-			context.error.map(format(_:)).map { #""error": "# + $0 },
-			separator: ",\n"
-		),
-		"}",
-	].joined(separator: "\n")
+	var jsonResult: [String: JSON] = [
+		"range": json(location..<location),
+		"input": json(context.codeBlock),
+	]
+	if let result = context.result {
+		jsonResult["result"] = json(result)
+	}
+	if let error = context.error {
+		jsonResult["error"] = json(error)
+	}
+	return .object(jsonResult)
 }
