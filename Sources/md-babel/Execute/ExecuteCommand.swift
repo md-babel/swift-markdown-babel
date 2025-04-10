@@ -4,7 +4,7 @@ import Foundation
 import Markdown
 import MarkdownBabel
 
-struct Execute: AsyncParsableCommand {
+struct ExecuteCommand: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "execute",
 		abstract: "Execute code blocks",

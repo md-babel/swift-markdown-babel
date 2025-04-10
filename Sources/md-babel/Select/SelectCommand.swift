@@ -4,7 +4,7 @@ import Foundation
 import Markdown
 import MarkdownBabel
 
-struct Select: ParsableCommand {
+struct SelectCommand: ParsableCommand {
 	// MARK: - Input File
 
 	@Option(
