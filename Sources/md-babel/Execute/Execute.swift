@@ -125,17 +125,3 @@ func json(
 	}
 	return json
 }
-
-func json(_ location: SourceLocation) -> JSON {
-	return [
-		"line": .integer(Int64(location.line)),
-		"column": .integer(Int64(location.column)),
-	]
-}
-
-func json(_ range: SourceRange) -> JSON {
-	return [
-		"from": json(range.lowerBound),
-		"to": json(range.upperBound),
-	]
-}
