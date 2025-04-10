@@ -56,11 +56,11 @@ struct Execute: AsyncParsableCommand {
 		let document = try markdownDocument()
 		let location = try sourceLocation()
 		guard let context = document.executableContext(at: location) else {
-			// print(document.debugDescription())
-			// fatalError("no context")
-			return  // TODO: throw error? produce not-found response?
+			// TODO: Produce "nothing found" response. https://github.com/md-babel/swift-markdown-babel/issues/15
+			FileHandle.standardOutput.write(try JSON.object([:]).data())
+			return
 		}
-		// TODO: Escalate hydrading configurations from ~/.config/ and ~/Library/Application Support/ and local path and --config parameter, and offer --no-user-config to skip shared config completely.
+		// TODO: Support ExecutableConfiguration from config files. https://github.com/md-babel/swift-markdown-babel/issues/14
 		let registry = ExecutableRegistry(configurations: [
 			"sh": .init(executableURL: URL(fileURLWithPath: "/usr/bin/env"), arguments: ["sh"])
 		])
