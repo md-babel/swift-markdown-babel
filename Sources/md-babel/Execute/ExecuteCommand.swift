@@ -59,13 +59,25 @@ struct ExecuteCommand: AsyncParsableCommand {
 	)
 	var configFile: URL?
 
+	@Flag(
+		name: .customLong("load-user-config"),
+		inversion: .prefixedNo,
+		exclusivity: .exclusive,
+		help: ArgumentHelp(
+			"Whether to load the user's global config file.",
+			discussion:
+				"Disabling the global user configuration without setting --config will result in no context being recognized."
+		)
+	)
+	var loadUserConfig = true
+
 	func executableRegistry() throws -> ExecutableRegistry {
-		let xdgConfigURL = FileManager.default.homeDirectoryForCurrentUser
-			.appending(path: ".config", directoryHint: .isDirectory)
-			.appending(path: "md-babel", directoryHint: .isDirectory)
-			.appending(path: "config", directoryHint: .notDirectory)
-			.appendingPathExtension("json")
-		let fromXDG = (try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
+		let fromXDG: [String: ExecutableConfiguration] =
+			if loadUserConfig {
+				(try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
+			} else {
+				[:]
+			}
 		let fromFile = try configFile.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
 
 		var configurations: [String: ExecutableConfiguration] = [:]

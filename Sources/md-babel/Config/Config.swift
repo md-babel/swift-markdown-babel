@@ -18,10 +18,16 @@ extension ConfigCommand {
 		)
 
 		@Flag(
-			name: .customLong("no-user-config"),
-			help: "Whether to *not* load the user's global config file."
+			name: .customLong("load-user-config"),
+			inversion: .prefixedNo,
+			exclusivity: .exclusive,
+			help: ArgumentHelp(
+				"Whether to load the user's global config file.",
+				discussion:
+					"Disabling the global user configuration without setting --config will result in no context being recognized."
+			)
 		)
-		var isSkippingUserConfig = false
+		var loadUserConfig = true
 
 		// MARK: - Config File
 
@@ -34,10 +40,10 @@ extension ConfigCommand {
 
 		func executableRegistry() throws -> ExecutableRegistry {
 			let fromXDG: [String: ExecutableConfiguration] =
-				if isSkippingUserConfig {
-					[:]
-				} else {
+				if loadUserConfig {
 					(try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
+				} else {
+					[:]
 				}
 			let fromFile = try configFile.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
 

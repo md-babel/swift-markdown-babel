@@ -12,7 +12,7 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
 
 ### Execute Block
 
-    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--no-user-config] [--config <config>]
+    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--no-load-user-config] [--config <config>]
 
 1. Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
 2. execute it in its context,
@@ -28,14 +28,14 @@ See [md-babel.el][] for an implementation in Emacs.
 
 ### Configuration
 
-    Usage: md-babel config dump [--no-user-config] [--config <config>]
+    Usage: md-babel config dump [--no-load-user-config] [--config <config>]
 
 Pretty-prints the JSON configuration as found in your global configuration file, merged with `<config>` (if you pass that).
 
 #### Configuration File
 
 - **Location:** `~/.config/md-babel/config.json`
-- **Precedence:** Loaded first. Skip with `--no-user-config`.
+- **Precedence:** Loaded first. Skip with `--no-load-user-config`.
 
 Pass overrides to `md-babel execute` with the `--config` option.
 Client applications can define their own block handlers this way.
@@ -60,7 +60,8 @@ Here's a simple example for shell scripts:
 }
 ```
 
-If you can rely on `/usr/bin/env`, like with hash-bangs, this is easy.
+If you can rely on `/usr/bin/env`, like with hash-bangs, you can set and forget it. 
+(With pyenv, rbenv, asdf, ... your mileage may vary!)
 
 [config-schema]: https://github.com/md-babel/md-babel-schema/tree/main/config
 
