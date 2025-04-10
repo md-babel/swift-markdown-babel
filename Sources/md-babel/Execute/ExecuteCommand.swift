@@ -1,9 +1,10 @@
 import ArgumentParser
+import DynamicJSON
 import Foundation
 import Markdown
 import MarkdownBabel
 
-struct Execute: AsyncParsableCommand {
+struct ExecuteCommand: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "execute",
 		abstract: "Execute code blocks",
@@ -49,20 +50,42 @@ struct Execute: AsyncParsableCommand {
 		Markdown.SourceLocation(line: line, column: column, source: inputFile)
 	}
 
+	// MARK: - Config File
+
+	@Option(
+		name: .customLong("config"),
+		help: "Config file path.",
+		transform: { URL(fileURLWithPath: $0) }
+	)
+	var configFile: URL?
+
+	@Flag(
+		name: .customLong("load-user-config"),
+		inversion: .prefixedNo,
+		exclusivity: .exclusive,
+		help: ArgumentHelp(
+			"Whether to load the user's global config file.",
+			discussion:
+				"Disabling the global user configuration without setting --config will result in no context being recognized."
+		)
+	)
+	var loadUserConfig = true
+
+	func executableRegistry() throws -> ExecutableRegistry {
+		return try ExecutableRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
+	}
+
 	// MARK: - Run
 
 	func run() async throws {
 		let document = try markdownDocument()
 		let location = try sourceLocation()
 		guard let context = document.executableContext(at: location) else {
-			// print(document.debugDescription())
-			// fatalError("no context")
-			return  // TODO: throw error? produce not-found response?
+			// TODO: Produce "nothing found" response. https://github.com/md-babel/swift-markdown-babel/issues/15
+			FileHandle.standardOutput.write(try JSON.object([:]).data())
+			return
 		}
-		// TODO: Escalate hydrading configurations from ~/.config/ and ~/Library/Application Support/ and local path and --config parameter, and offer --no-user-config to skip shared config completely.
-		let registry = ExecutableRegistry(configurations: [
-			"sh": .init(executableURL: URL(fileURLWithPath: "/usr/bin/env"), arguments: ["sh"])
-		])
+		let registry = try executableRegistry()
 		let executionResult: ExecutionResult = await {
 			do {
 				let executable = try registry.executable(forCodeBlock: context.codeBlock)
@@ -73,8 +96,9 @@ struct Execute: AsyncParsableCommand {
 			}
 		}()
 
-		let response = format(location: location, executableContext: context, executionResult: executionResult)
-		FileHandle.standardOutput.write(response.data(using: .utf8)!)
+		let response = json(location: location, executableContext: context, executionResult: executionResult)
+		let data = try response.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+		FileHandle.standardOutput.write(data)
 	}
 }
 
@@ -98,11 +122,11 @@ extension ExecutionResult {
 	}
 }
 
-func format(
+func json(
 	location: SourceLocation,
 	executableContext: ExecutableContext,
 	executionResult: ExecutionResult
-) -> String {
+) -> JSON {
 	let document = Document(
 		[
 			[executableContext.codeBlock],
@@ -111,17 +135,16 @@ func format(
 		].flatMap { $0 }
 	)
 	let renderedString = document.format()
-	return [
-		"{",
-		format(
-			indentation: 1,
-			"\"range\": \(format(location ..< location))",
-			"\"replacementRange\": \(format(executableContext.encompassingRange))",
-			"\"replacementString\": \"\(sanitize(renderedString))\"",
-			executionResult.output.map(sanitize(_:)).map { "\"result\": \"\($0)\"" },
-			executionResult.error.map(sanitize(_:)).map { "\"error\": \"\($0)\"" },
-			separator: ",\n"
-		),
-		"}",
-	].joined(separator: "\n")
+	var jsonResult: [String: JSON] = [
+		"range": json(location..<location),
+		"replacementRange": json(executableContext.encompassingRange),
+		"replacementString": .string(renderedString),
+	]
+	if let output = executionResult.output {
+		jsonResult["result"] = .string(output)
+	}
+	if let error = executionResult.error {
+		jsonResult["error"] = .string(error)
+	}
+	return .object(jsonResult)
 }
