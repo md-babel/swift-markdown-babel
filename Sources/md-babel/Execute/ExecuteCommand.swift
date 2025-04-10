@@ -72,19 +72,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 	var loadUserConfig = true
 
 	func executableRegistry() throws -> ExecutableRegistry {
-		let fromXDG: [String: ExecutableConfiguration] =
-			if loadUserConfig {
-				(try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
-			} else {
-				[:]
-			}
-		let fromFile = try configFile.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
-
-		var configurations: [String: ExecutableConfiguration] = [:]
-		configurations.merge(fromXDG) { _, new in new }
-		configurations.merge(fromFile) { _, new in new }
-
-		return ExecutableRegistry(configurations: configurations)
+		return try ExecutableRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
 	}
 
 	// MARK: - Run

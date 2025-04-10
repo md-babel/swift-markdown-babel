@@ -1,6 +1,9 @@
 {
-  "sh": {
-	"path": "/usr/bin/env",
-	"defaultArguments": ["sh"]
+  "codeBlock" : {
+	"sh": {
+	  "path": "/usr/bin/env",
+	  "defaultArguments": ["sh"],
+	  "result": "codeBlock"
+	}
   }
 }

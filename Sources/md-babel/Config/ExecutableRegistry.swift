@@ -1,12 +1,12 @@
 import Markdown
 
 struct ExecutableRegistry {
-	let configurations: [String: ExecutableConfiguration]
+	let codeBlockConfigurations: [String: ExecutableConfiguration]
 }
 
 extension ExecutableRegistry {
 	func configuration(language: String) throws(ExecutionFailure) -> ExecutableConfiguration {
-		guard let configuration = configurations[language]
+		guard let configuration = codeBlockConfigurations[language]
 		else { throw .configurationMissing(codeLanguage: language) }
 		return configuration
 	}
