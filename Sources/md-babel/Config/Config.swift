@@ -1,42 +1,52 @@
 import ArgumentParser
 import Foundation
 
-struct Config: AsyncParsableCommand {
+struct ConfigCommand: ParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "config",
-		abstract: "Inspect your effective configuration",
+		subcommands: [DumpCommand.self],
+		// defaultSubcommand: DumpCommand.self,
 		aliases: ["configure", "configuration"]
 	)
+}
 
-	// MARK: - Config File
+extension ConfigCommand {
+	struct DumpCommand: ParsableCommand {
+		static let configuration = CommandConfiguration(
+			commandName: "dump",
+			abstract: "Inspect your effective configuration"
+		)
 
-	@Option(
-		name: .customLong("config"),
-		help: "Config file path.",
-		transform: { URL(fileURLWithPath: $0) }
-	)
-	var configFile: URL?
+		// MARK: - Config File
 
-	func executableRegistry() throws -> ExecutableRegistry {
-		let xdgConfigURL = FileManager.default.homeDirectoryForCurrentUser
-			.appending(path: ".config", directoryHint: .isDirectory)
-			.appending(path: "md-babel", directoryHint: .isDirectory)
-			.appending(path: "config", directoryHint: .notDirectory)
-			.appendingPathExtension("json")
-		let fromXDG = (try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
-		let fromFile = try configFile.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
+		@Option(
+			name: .customLong("config"),
+			help: "Config file path.",
+			transform: { URL(fileURLWithPath: $0) }
+		)
+		var configFile: URL?
 
-		var configurations: [String: ExecutableConfiguration] = [:]
-		configurations.merge(fromXDG) { _, new in new }
-		configurations.merge(fromFile) { _, new in new }
+		func executableRegistry() throws -> ExecutableRegistry {
+			let xdgConfigURL = FileManager.default.homeDirectoryForCurrentUser
+				.appending(path: ".config", directoryHint: .isDirectory)
+				.appending(path: "md-babel", directoryHint: .isDirectory)
+				.appending(path: "config", directoryHint: .notDirectory)
+				.appendingPathExtension("json")
+			let fromXDG = (try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
+			let fromFile = try configFile.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
 
-		return ExecutableRegistry(configurations: configurations)
-	}
+			var configurations: [String: ExecutableConfiguration] = [:]
+			configurations.merge(fromXDG) { _, new in new }
+			configurations.merge(fromFile) { _, new in new }
 
-	func run() async throws {
-		let registry = try executableRegistry()
-		let json = try registry.json()
-		let data = try json.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
-		FileHandle.standardOutput.write(data)
+			return ExecutableRegistry(configurations: configurations)
+		}
+
+		func run() throws {
+			let registry = try executableRegistry()
+			let json = try registry.json()
+			let data = try json.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+			FileHandle.standardOutput.write(data)
+		}
 	}
 }

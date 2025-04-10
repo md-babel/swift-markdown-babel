@@ -8,7 +8,7 @@ struct MarkdownBabel: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "md-babel",
 		// abstract: String, usage: String?, discussion: String, version: String, shouldDisplay: Bool,
-		subcommands: [Execute.self, Select.self, Config.self],
+		subcommands: [Execute.self, Select.self, ConfigCommand.self],
 		defaultSubcommand: nil
 	)
 }
