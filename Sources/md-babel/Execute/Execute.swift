@@ -60,14 +60,11 @@ struct Execute: AsyncParsableCommand {
 	var configFile: URL?
 
 	func executableRegistry() throws -> ExecutableRegistry {
-		let configurations: [String: ExecutableConfiguration]
-		if let configFile {
-			let data = try Data(contentsOf: configFile)
-			let json = try JSON(data: data)
-			configurations = try ExecutableConfiguration.configurations(fromJSON: json)
-		} else {
-			configurations = [:]
-		}
+		let fromFile = try configFile.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
+
+		var configurations: [String: ExecutableConfiguration] = [:]
+		configurations.merge(fromFile) { _, new in new }
+
 		return ExecutableRegistry(configurations: configurations)
 	}
 

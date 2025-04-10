@@ -19,4 +19,10 @@ extension ExecutableConfiguration {
 		guard let object = json.objectValue else { throw JSON.Error.typeMismatch(.object, json) }
 		return try object.mapValues { try ExecutableConfiguration(fromJSON: $0) }
 	}
+
+	static func configurations(jsonFileAtURL url: URL) throws -> [String: ExecutableConfiguration] {
+		let data = try Data(contentsOf: url)
+		let json = try JSON(data: data)
+		return try ExecutableConfiguration.configurations(fromJSON: json)
+	}
 }
