@@ -4,7 +4,7 @@ import Foundation
 import Markdown
 import MarkdownBabel
 
-struct Execute: AsyncParsableCommand {
+struct ExecuteCommand: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "execute",
 		abstract: "Execute code blocks",
@@ -50,6 +50,31 @@ struct Execute: AsyncParsableCommand {
 		Markdown.SourceLocation(line: line, column: column, source: inputFile)
 	}
 
+	// MARK: - Config File
+
+	@Option(
+		name: .customLong("config"),
+		help: "Config file path.",
+		transform: { URL(fileURLWithPath: $0) }
+	)
+	var configFile: URL?
+
+	@Flag(
+		name: .customLong("load-user-config"),
+		inversion: .prefixedNo,
+		exclusivity: .exclusive,
+		help: ArgumentHelp(
+			"Whether to load the user's global config file.",
+			discussion:
+				"Disabling the global user configuration without setting --config will result in no context being recognized."
+		)
+	)
+	var loadUserConfig = true
+
+	func executableRegistry() throws -> ExecutableRegistry {
+		return try ExecutableRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
+	}
+
 	// MARK: - Run
 
 	func run() async throws {
@@ -60,10 +85,7 @@ struct Execute: AsyncParsableCommand {
 			FileHandle.standardOutput.write(try JSON.object([:]).data())
 			return
 		}
-		// TODO: Support ExecutableConfiguration from config files. https://github.com/md-babel/swift-markdown-babel/issues/14
-		let registry = ExecutableRegistry(configurations: [
-			"sh": .init(executableURL: URL(fileURLWithPath: "/usr/bin/env"), arguments: ["sh"])
-		])
+		let registry = try executableRegistry()
 		let executionResult: ExecutionResult = await {
 			do {
 				let executable = try registry.executable(forCodeBlock: context.codeBlock)
@@ -75,7 +97,8 @@ struct Execute: AsyncParsableCommand {
 		}()
 
 		let response = json(location: location, executableContext: context, executionResult: executionResult)
-		FileHandle.standardOutput.write(try response.data())
+		let data = try response.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+		FileHandle.standardOutput.write(data)
 	}
 }
 
