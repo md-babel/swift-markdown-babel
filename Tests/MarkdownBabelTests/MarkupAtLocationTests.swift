@@ -12,10 +12,10 @@ extension Markdown.Markup {
 	@Suite("in an empty document") struct EmptyDocument {
 		let document = MarkdownDocument(parsing: "")
 
+		// swift-format-ignore: AlwaysUseLowerCamelCase
 		@Test(
 			"at invalid values before {1,1}, outside the domain, returns nil",
 			arguments: [(0, 0), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
-			// swift-format-ignore: AlwaysUseLowerCamelCase
 		) func beforeValidDomainValues_IsNil(location: (line: Int, column: Int)) {
 			let location = SourceLocation(line: location.line, column: location.column, source: nil)
 			#expect(document.markup(at: location) == nil)
