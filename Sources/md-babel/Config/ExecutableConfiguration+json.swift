@@ -1,5 +1,6 @@
 import DynamicJSON
 import Foundation
+import MarkdownBabel
 
 extension ExecutableConfiguration {
 	struct Representation: Codable {
