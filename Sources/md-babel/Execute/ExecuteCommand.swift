@@ -86,15 +86,10 @@ struct ExecuteCommand: AsyncParsableCommand {
 			return
 		}
 		let registry = try executableRegistry()
-		let executionResult: ExecutionResult = await {
-			do {
-				let executable = try registry.executable(forCodeBlock: context.codeBlock)
-				let result = try await executable.run(code: context.codeBlock.code)
-				return ExecutionResult(output: result, error: nil)
-			} catch {
-				return ExecutionResult(output: nil, error: "\(error)")
-			}
-		}()
+		let executionResult = await ExecuteResponse.ExecutionResult.fromRunning {
+			let executable = try registry.executable(forCodeBlock: context.codeBlock)
+			return try await executable.run(code: context.codeBlock.code)
+		}
 
 		let response = json(location: location, executableContext: context, executionResult: executionResult)
 		let data = try response.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
@@ -102,7 +97,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 	}
 }
 
-extension ExecutionResult {
+extension ExecuteResponse.ExecutionResult {
 	func outputBlocks(reusing oldResult: ExecutableContext.Result?) -> [any BlockMarkup] {
 		guard let output else { return [] }
 		let header: String = oldResult?.header ?? "Result:"
@@ -125,7 +120,7 @@ extension ExecutionResult {
 func json(
 	location: SourceLocation,
 	executableContext: ExecutableContext,
-	executionResult: ExecutionResult
+	executionResult: ExecuteResponse.ExecutionResult
 ) -> JSON {
 	let document = Document(
 		[
@@ -134,7 +129,7 @@ func json(
 			executionResult.errorBlocks(reusing: executableContext.error),
 		].flatMap { $0 }
 	)
-	let renderedString = document.format()
+	let renderedString = document.format(options: .init(useCodeFence: .always))
 	var jsonResult: [String: JSON] = [
 		"range": json(location..<location),
 		"replacementRange": json(executableContext.encompassingRange),
