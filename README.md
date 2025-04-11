@@ -2,7 +2,47 @@
 
 A Markdown toolchain to make your documents executable.
 
-    
+## Demo
+
+We'll 'execute' the code block in [`test.txt`](test.txt) that shells out to `date` (around [line 7](https://github.com/md-babel/swift-markdown-babel/blob/main/test.txt#L6), with 1-based counting), using the [`config.json`](config.json) that instructs `md-babel` how to interpret `sh` code blocks.
+
+Clone the repository; 
+
+    $ git clone https://github.com/md-babel/swift-markdown-babel.git
+    $ cd swift-markdown-babel
+
+-   **From source:** Use `swift run` to compile from source and then use the program.
+
+    > [!NOTE]  
+    > Why `2>/dev/null`? Because 'quiet' Swift still produces output, but routes it to standard error.
+
+    ```sh
+    swift run --quiet md-babel exec --file test.txt --line 7 --column 1 --config config.json  2>/dev/null
+    ```
+
+-   **From pre-built binary:** Download a [tagged release](https://github.com/md-babel/swift-markdown-babel/releases), then run `md-babel` directly (without the "`swift run --quiet`" part).
+
+    ```sh
+    ./md-babel exec --file test.txt --line 7 --column 1 --config config.json
+    ```
+
+The result will contain metadata that specifies the affected range in the document, but the interesting part is this:
+
+```json
+{
+  ...,
+  "replacementString" : "```sh\ndate\n```\n\n<!--Result:-->\n```\nFri Apr 11 13:00:28 CEST 2025```",
+  "result" : "Fri Apr 11 13:00:28 CEST 2025"
+}
+```
+
+-   Editor applications can use `"replacementString"` to modify the document directly, turning Markdown documents into executable notebooks.
+
+    Check out the [md-babel GitHub organization's repositories](https://github.com/md-babel) to see whether your favorite editor has an integration!
+
+-   Other applications can use the plain output from `"result"`.
+
+
 ## Usage
 
 The `md-babel` program implements [the schema](https://github.com/md-babel/md-babel-schema) so that you can run your code from the command-line (very cumbersome) or an editor plugin (very convenient).
