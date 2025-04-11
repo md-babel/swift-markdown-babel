@@ -9,30 +9,27 @@ extension ExecutableConfiguration {
 		let result: String
 	}
 
-	static func configurations(fromJSON json: JSON) throws -> [String: ExecutableConfiguration] {
-		guard let object = json.objectValue else { throw JSON.Error.typeMismatch(.object, json) }
-		return try object.mapValues { try ExecutableConfiguration(fromJSON: $0) }
+	static func codeBlockConfigurations(
+		fromJSON json: JSON
+	) throws -> [ResultMarkupType: ExecutableConfiguration] {
+		guard let object = json.objectValue
+		else { throw JSON.Error.typeMismatch(.object, json) }
+		let configurations = try object.map { try ExecutableConfiguration(codeBlockFromJSON: $1, language: $0) }
+		return Dictionary(zip(configurations.map(\.resultMarkupType), configurations)) { _, new in new }
 	}
 
-	static func configurations(jsonFileAtURL url: URL) throws -> [ResultMarkupType: [String: ExecutableConfiguration]] {
+	static func configurations(jsonFileAtURL url: URL) throws -> [ResultMarkupType: ExecutableConfiguration] {
 		let data = try Data(contentsOf: url)
 		let json = try JSON(data: data)
-		var result: [ResultMarkupType: [String: ExecutableConfiguration]] = [:]
-		result[.codeBlock] = try json["codeBlock"].map(ExecutableConfiguration.configurations(fromJSON:))
-		return result
+		return try json["codeBlock"].map(ExecutableConfiguration.codeBlockConfigurations(fromJSON:)) ?? [:]
 	}
 
-	init(fromJSON json: JSON) throws {
+	init(codeBlockFromJSON json: JSON, language: String) throws {
 		let rep: Representation = try json.coerce()
-		let resultMarkupType: ResultMarkupType =
-			switch rep.result {
-			case "codeBlock": .codeBlock
-			default: .codeBlock
-			}
 		self.init(
 			executableURL: URL(fileURLWithPath: rep.path),
 			arguments: rep.defaultArguments,
-			resultMarkupType: resultMarkupType
+			resultMarkupType: .codeBlock(language: language)
 		)
 	}
 

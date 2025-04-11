@@ -1,28 +1,37 @@
 import Markdown
 
 public struct ExecutableRegistry {
-	public let codeBlockConfigurations: [String: ExecutableConfiguration]
+	public typealias Configurations = [ExecutableConfiguration.ResultMarkupType: ExecutableConfiguration]
 
-	public init(codeBlockConfigurations: [String: ExecutableConfiguration]) {
-		self.codeBlockConfigurations = codeBlockConfigurations
+	public let configurations: Configurations
+
+	public init(configurations: Configurations) {
+		self.configurations = configurations
 	}
 }
 
 extension ExecutableRegistry {
+	@inlinable
 	public func configuration(
 		forCodeBlock codeBlock: Markdown.CodeBlock
 	) throws(ExecutableRegistryFailure) -> ExecutableConfiguration {
 		guard let language = codeBlock.language
 		else { throw .codeBlockWithoutLanguage }
-
 		return try self.configuration(codeBlockWithLanguage: language)
 	}
 
+	@inlinable
 	public func configuration(
 		codeBlockWithLanguage language: String
 	) throws(ExecutableRegistryFailure) -> ExecutableConfiguration {
-		guard let configuration = codeBlockConfigurations[language]
-		else { throw .configurationMissing(codeLanguage: language) }
+		return try configuration(.codeBlock(language: language))
+	}
+
+	public func configuration(
+		_ type: ExecutableConfiguration.ResultMarkupType
+	) throws(ExecutableRegistryFailure) -> ExecutableConfiguration {
+		guard let configuration = configurations[type]
+		else { throw .configurationMissing(type) }
 		return configuration
 	}
 }
