@@ -34,8 +34,6 @@
 		"FullyIndirectEnum" : true,
 		"GroupNumericLiterals" : true,
 		"IdentifiersMustBeASCII" : true,
-		"NeverForceUnwrap" : true,
-		"NeverUseForceTry" : true,
 		"NeverUseImplicitlyUnwrappedOptionals" : false,
 		"NoAccessLevelOnExtensionDeclaration" : true,
 		"NoAssignmentInExpressions" : true,

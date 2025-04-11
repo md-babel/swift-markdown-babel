@@ -18,6 +18,7 @@ import Testing
 			"""
 	)
 
+	// swift-format-ignore: AlwaysUseLowerCamelCase
 	@Test("filter + any map") func filter_map() {
 		let transformation =
 			document
@@ -39,6 +40,7 @@ import Testing
 		#expect(result == expected)
 	}
 
+	// swift-format-ignore: AlwaysUseLowerCamelCase
 	@Test("compactMap + map") func compactMap_map() {
 		let transformation =
 			document
@@ -60,6 +62,7 @@ import Testing
 		#expect(result == expected)
 	}
 
+	// swift-format-ignore: AlwaysUseLowerCamelCase
 	@Test("compactMap + filter + map") func compactMap_filter_map() {
 		let transformation =
 			document
