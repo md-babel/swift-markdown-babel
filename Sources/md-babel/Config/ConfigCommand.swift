@@ -1,5 +1,6 @@
 import ArgumentParser
 import Foundation
+import MarkdownBabel
 
 struct ConfigCommand: ParsableCommand {
 	static let configuration = CommandConfiguration(
