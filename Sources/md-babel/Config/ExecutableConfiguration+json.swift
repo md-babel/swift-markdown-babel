@@ -14,11 +14,11 @@ extension ExecutableConfiguration {
 		return try object.mapValues { try ExecutableConfiguration(fromJSON: $0) }
 	}
 
-	static func configurations(jsonFileAtURL url: URL) throws -> [String: [String: ExecutableConfiguration]] {
+	static func configurations(jsonFileAtURL url: URL) throws -> [ResultMarkupType: [String: ExecutableConfiguration]] {
 		let data = try Data(contentsOf: url)
 		let json = try JSON(data: data)
-		var result: [String: [String: ExecutableConfiguration]] = [:]
-		result["codeBlock"] = try json["codeBlock"].map(ExecutableConfiguration.configurations(fromJSON:))
+		var result: [ResultMarkupType: [String: ExecutableConfiguration]] = [:]
+		result[.codeBlock] = try json["codeBlock"].map(ExecutableConfiguration.configurations(fromJSON:))
 		return result
 	}
 

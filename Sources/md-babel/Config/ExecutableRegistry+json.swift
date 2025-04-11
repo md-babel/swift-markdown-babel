@@ -3,20 +3,22 @@ import Foundation
 import MarkdownBabel
 
 extension ExecutableRegistry {
+	typealias Configurations = [ExecutableConfiguration.ResultMarkupType: [String: ExecutableConfiguration]]
+
 	static func load(
 		fromXDG loadFromXDG: Bool,
 		fromFile fileURL: URL?
 	) throws -> ExecutableRegistry {
-		let xdgSource: [String: [String: ExecutableConfiguration]] =
+		let xdgSource: Configurations =
 			if loadFromXDG {
 				(try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
 			} else {
 				[:]
 			}
-		let fileSource = try fileURL.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
+		let fileSource: Configurations = try fileURL.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
 
-		var configurations: [String: [String: ExecutableConfiguration]] = [
-			"codeBlock": [:]
+		var configurations: Configurations = [
+			.codeBlock: [:]
 		]
 		for (type, var configsForType) in configurations {
 			for source in [xdgSource, fileSource] {
@@ -26,7 +28,7 @@ extension ExecutableRegistry {
 			configurations[type] = configsForType
 		}
 
-		return ExecutableRegistry(codeBlockConfigurations: configurations["codeBlock", default: [:]])
+		return ExecutableRegistry(codeBlockConfigurations: configurations[.codeBlock, default: [:]])
 	}
 
 	func json() throws -> JSON {

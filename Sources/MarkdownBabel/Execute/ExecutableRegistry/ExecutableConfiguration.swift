@@ -2,7 +2,8 @@ import struct Foundation.URL
 
 /// Represents how to start an executable process, to be stored in configuration files.
 public struct ExecutableConfiguration {
-	public enum ResultMarkupType {
+	/// Type of Markdown node to apply the executable to.
+	public enum ResultMarkupType: Hashable {
 		case codeBlock
 	}
 
