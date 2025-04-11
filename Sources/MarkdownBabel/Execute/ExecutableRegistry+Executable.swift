@@ -1,5 +1,4 @@
 import Markdown
-import MarkdownBabel
 
 extension ExecutableRegistry {
 	func executable(

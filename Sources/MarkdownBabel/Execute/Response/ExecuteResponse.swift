@@ -1,11 +1,11 @@
 /// Response for `md-babel exec`.
-public struct ExecuteResponse: Equatable, Sendable {
+public struct ExecuteResponse {
 	/// Execution can (theoretically) finish with a result *and* error to support the document transformation of:
 	///
 	///     (ExecutableBlock, Result?, Error?) -> (ExecutableBlock, Result?, Error?)
 	///
 	/// The document may have both blocks, and the transformed result may contain both or neither.
-	public struct ExecutionResult: Equatable, Sendable {
+	public struct ExecutionResult: Equatable {
 		/// - Note: `nil` will remove existing result blocks from the document during interpretation.
 		public let output: String?
 
@@ -21,15 +21,36 @@ public struct ExecuteResponse: Equatable, Sendable {
 		}
 	}
 
+	public let executableContext: ExecutableContext
 	public let executionResult: ExecutionResult
 
-	public init(executionResult: ExecutionResult) {
+	public init(
+		executableContext: ExecutableContext,
+		executionResult: ExecutionResult
+	) {
+		self.executableContext = executableContext
 		self.executionResult = executionResult
 	}
 }
 
-extension ExecuteResponse.ExecutionResult {
+extension ExecuteResponse {
 	public static func fromRunning(
+		_ executableContext: ExecutableContext,
+		registry: ExecutableRegistry
+	) async -> Self {
+		let result = await ExecutionResult.fromRunning {
+			let executable = try registry.executable(forCodeBlock: executableContext.codeBlock)
+			return try await executable.run(code: executableContext.codeBlock.code)
+		}
+		return self.init(
+			executableContext: executableContext,
+			executionResult: result
+		)
+	}
+}
+
+extension ExecuteResponse.ExecutionResult {
+	static func fromRunning(
 		_ block: () async throws -> String
 	) async -> Self {
 		do {
