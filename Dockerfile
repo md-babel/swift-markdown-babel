@@ -1,42 +1,38 @@
-# ================================
-# Build image
-# ================================
-FROM swift:6.1.0-noble AS build
+# syntax=docker/dockerfile:1
 
-# Install OS updates
-RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
-    && apt-get -q update \
-    && apt-get -q dist-upgrade -y \
-    && apt-get install -y libjemalloc-dev
+# Builds the CLI and moves it into:
+#
+#   /workspace/dist/
 
-# Set up a build area
-WORKDIR /build
+FROM --platform=$BUILDPLATFORM docker.io/swift:6.1.0 AS build
+WORKDIR /workspace
+RUN swift sdk install \
+	https://download.swift.org/swift-6.1-release/static-sdk/swift-6.1-RELEASE/swift-6.1-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz \
+	--checksum 111c6f7d280a651208b8c74c0521dd99365d785c1976a6e23162f55f65379ac6
 
-# First just resolve dependencies.
-# This creates a cached layer that can be reused
-# as long as your Package.swift/Package.resolved
-# files do not change.
-COPY ./Package.* ./
-RUN swift package resolve \
-    $([ -f ./Package.resolved ] && echo "--force-resolved-versions" || true)
+COPY ./Package.swift ./Package.resolved /workspace/
+RUN --mount=type=cache,target=/workspace/.spm-cache,id=spm-cache \
+	swift package \
+	--cache-path /workspace/.spm-cache \
+	--only-use-versions-from-resolved-file \
+	resolve
 
-# Copy entire repo into container
-COPY . .
+COPY ./scripts /workspace/scripts
+COPY ./Sources /workspace/Sources
+COPY ./Tests /workspace/Tests
+ARG TARGETPLATFORM
+RUN --mount=type=cache,target=/workspace/.build,id=build-$TARGETPLATFORM \
+	--mount=type=cache,target=/workspace/.spm-cache,id=spm-cache \
+	scripts/build-release.sh && \
+	mkdir -p dist && \
+	cp .build/release/md-babel dist
 
-# Build the application
-RUN swift build -c release \
-    --product md-babel \
-    --static-swift-stdlib
-
-WORKDIR /staging
-
-# Copy main executable to staging area
-RUN cp "$(swift build --package-path /build -c release --show-bin-path)/md-babel" ./
-
-# ================================
-# Export build product
-# ================================
-# Usage:
-#  $ docker build --target export -o . .
+# Export the build products to your host file system:
+#
+#   $ mkdir -p ./release
+#   $ docker buildx build --platform linux/arm64,linux/amd64 --target export -o ./release .
+#   $ ls ./release
+#     linux_amd64
+#     linux_arm64
 FROM scratch AS export
-COPY --from=build /staging/md-babel /
+COPY --from=build /workspace/dist/md-babel /
