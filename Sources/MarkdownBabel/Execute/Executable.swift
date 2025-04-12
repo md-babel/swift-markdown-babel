@@ -1,7 +1,7 @@
 import Foundation
 
 struct Executable {
-	let configuration: ExecutableConfiguration
+	let configuration: EvaluatorConfiguration
 
 	func run(code: String) async throws -> String {
 		let runProcess = configuration.makeRunProcess()

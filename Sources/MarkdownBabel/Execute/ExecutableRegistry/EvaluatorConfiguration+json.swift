@@ -1,27 +1,26 @@
 import DynamicJSON
 import Foundation
-import MarkdownBabel
 
-extension ExecutableConfiguration {
+extension EvaluatorConfiguration {
 	struct Representation: Codable {
 		let path: String
 		let defaultArguments: [String]
 		let result: String
 	}
 
-	static func codeBlockConfigurations(
+	public static func codeBlockConfigurations(
 		fromJSON json: JSON
-	) throws -> [ExecutableMarkup: ExecutableConfiguration] {
+	) throws -> [ExecutableMarkup: EvaluatorConfiguration] {
 		guard let object = json.objectValue
 		else { throw JSON.Error.typeMismatch(.object, json) }
-		let configurations = try object.map { try ExecutableConfiguration(codeBlockFromJSON: $1, language: $0) }
+		let configurations = try object.map { try EvaluatorConfiguration(codeBlockFromJSON: $1, language: $0) }
 		return Dictionary(zip(configurations.map(\.executableMarkupType), configurations)) { _, new in new }
 	}
 
-	static func configurations(jsonFileAtURL url: URL) throws -> [ExecutableMarkup: ExecutableConfiguration] {
+	public static func configurations(jsonFileAtURL url: URL) throws -> [ExecutableMarkup: EvaluatorConfiguration] {
 		let data = try Data(contentsOf: url)
 		let json = try JSON(data: data)
-		return try json["codeBlock"].map(ExecutableConfiguration.codeBlockConfigurations(fromJSON:)) ?? [:]
+		return try json["codeBlock"].map(EvaluatorConfiguration.codeBlockConfigurations(fromJSON:)) ?? [:]
 	}
 
 	init(codeBlockFromJSON json: JSON, language: String) throws {
@@ -29,19 +28,20 @@ extension ExecutableConfiguration {
 		self.init(
 			executableURL: URL(fileURLWithPath: rep.path),
 			arguments: rep.defaultArguments,
-			executableMarkupType: .codeBlock(language: language)
+			executableMarkupType: .codeBlock(language: language),
+			resultMarkupType: try EvaluationResultMarkup(string: rep.result)
 		)
 	}
 
-	func json() throws -> JSON {
-		let executableMarkupType =
-			switch self.executableMarkupType {
+	public func json() throws -> JSON {
+		let resultMarkupType =
+			switch self.resultMarkupType {
 			case .codeBlock: "codeBlock"
 			}
 		let rep = Representation(
 			path: self.executableURL.path(),
 			defaultArguments: self.arguments,
-			result: executableMarkupType
+			result: resultMarkupType
 		)
 		return try JSON(encodable: rep)
 	}

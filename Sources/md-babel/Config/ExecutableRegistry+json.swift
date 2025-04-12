@@ -9,11 +9,11 @@ extension ExecutableRegistry {
 	) throws -> ExecutableRegistry {
 		let xdgSource: Configurations =
 			if loadFromXDG {
-				(try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
+				(try? EvaluatorConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
 			} else {
 				[:]
 			}
-		let fileSource: Configurations = try fileURL.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
+		let fileSource: Configurations = try fileURL.map(EvaluatorConfiguration.configurations(jsonFileAtURL:)) ?? [:]
 
 		var configurations: Configurations = [:]
 		for source in [xdgSource, fileSource] {
