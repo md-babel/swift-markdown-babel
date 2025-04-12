@@ -1,36 +1,39 @@
 import DynamicJSON
 import Foundation
+import MarkdownBabel
 
 extension ExecutableRegistry {
 	static func load(
 		fromXDG loadFromXDG: Bool,
 		fromFile fileURL: URL?
 	) throws -> ExecutableRegistry {
-		let xdgSource: [String: [String: ExecutableConfiguration]] =
+		let xdgSource: Configurations =
 			if loadFromXDG {
 				(try? ExecutableConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
 			} else {
 				[:]
 			}
-		let fileSource = try fileURL.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
+		let fileSource: Configurations = try fileURL.map(ExecutableConfiguration.configurations(jsonFileAtURL:)) ?? [:]
 
-		var configurations: [String: [String: ExecutableConfiguration]] = [
-			"codeBlock": [:]
-		]
-		for (type, var configsForType) in configurations {
-			for source in [xdgSource, fileSource] {
-				guard let matchingConfigs = source[type] else { continue }
-				configsForType.merge(matchingConfigs) { _, new in new }
-			}
-			configurations[type] = configsForType
+		var configurations: Configurations = [:]
+		for source in [xdgSource, fileSource] {
+			configurations.merge(source) { _, new in new }
 		}
 
-		return ExecutableRegistry(codeBlockConfigurations: configurations["codeBlock", default: [:]])
+		return ExecutableRegistry(configurations: configurations)
 	}
 
 	func json() throws -> JSON {
+		let codeBlockConfigs = try self.configurations
+			.compactMap { (key, config) in
+				return if case .codeBlock(let language) = key {
+					(language, try config.json())
+				} else {
+					nil
+				}
+			}
 		return .object([
-			"codeBlock": .object(try self.codeBlockConfigurations.mapValues { try $0.json() })
+			"codeBlock": .object(Dictionary(codeBlockConfigs) { _, new in new })
 		])
 	}
 }

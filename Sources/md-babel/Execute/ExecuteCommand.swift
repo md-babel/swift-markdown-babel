@@ -86,64 +86,25 @@ struct ExecuteCommand: AsyncParsableCommand {
 			return
 		}
 		let registry = try executableRegistry()
-		let executionResult: ExecutionResult = await {
-			do {
-				let executable = try registry.executable(forCodeBlock: context.codeBlock)
-				let result = try await executable.run(code: context.codeBlock.code)
-				return ExecutionResult(output: result, error: nil)
-			} catch {
-				return ExecutionResult(output: nil, error: "\(error)")
-			}
-		}()
-
-		let response = json(location: location, executableContext: context, executionResult: executionResult)
-		let data = try response.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+		let response = await ExecuteResponse.fromRunning(context, registry: registry)
+		let data =
+			try json(response, originalLocation: location)
+			.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
 		FileHandle.standardOutput.write(data)
 	}
 }
 
-extension ExecutionResult {
-	func outputBlocks(reusing oldResult: ExecutableContext.Result?) -> [any BlockMarkup] {
-		guard let output else { return [] }
-		let header: String = oldResult?.header ?? "Result:"
-		return [
-			HTMLCommentBlock(htmlBlock: HTMLBlock("<!--\(header)-->"))!,
-			CodeBlock(language: nil, output),
-		]
-	}
-
-	func errorBlocks(reusing oldError: ExecutableContext.Error?) -> [any BlockMarkup] {
-		guard let message = self.error else { return [] }
-		let header: String = oldError?.header ?? "Error:"
-		return [
-			HTMLCommentBlock(htmlBlock: HTMLBlock("<!--\(header)-->"))!,
-			CodeBlock(language: nil, message),
-		]
-	}
-}
-
-func json(
-	location: SourceLocation,
-	executableContext: ExecutableContext,
-	executionResult: ExecutionResult
-) -> JSON {
-	let document = Document(
-		[
-			[executableContext.codeBlock],
-			executionResult.outputBlocks(reusing: executableContext.result),
-			executionResult.errorBlocks(reusing: executableContext.error),
-		].flatMap { $0 }
-	)
-	let renderedString = document.format()
+func json(_ response: ExecuteResponse, originalLocation location: SourceLocation) -> JSON {
+	let renderedString = response.rendered()
 	var jsonResult: [String: JSON] = [
 		"range": json(location..<location),
-		"replacementRange": json(executableContext.encompassingRange),
+		"replacementRange": json(response.executableContext.encompassingRange),
 		"replacementString": .string(renderedString),
 	]
-	if let output = executionResult.output {
+	if let output = response.executionResult.output {
 		jsonResult["result"] = .string(output)
 	}
-	if let error = executionResult.error {
+	if let error = response.executionResult.error {
 		jsonResult["error"] = .string(error)
 	}
 	return .object(jsonResult)
