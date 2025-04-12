@@ -37,6 +37,7 @@ extension EvaluatorConfiguration {
 		let resultMarkupType =
 			switch self.resultMarkupType {
 			case .codeBlock: "codeBlock"
+			case .image: "image"
 			}
 		let rep = Representation(
 			path: self.executableURL.path(),
