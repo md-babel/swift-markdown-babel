@@ -1,8 +1,7 @@
+// swift-format-ignore-file
 import Markdown
 import MarkdownBabel
 import Testing
-
-// swift-format-ignore-file: AlwaysUseLowerCamelCase
 
 extension Markdown.Markup {
 	func dump() -> String {
