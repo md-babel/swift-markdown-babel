@@ -85,8 +85,8 @@ struct ExecuteCommand: AsyncParsableCommand {
 			FileHandle.standardOutput.write(try JSON.object([:]).data())
 			return
 		}
-		let registry = try evaluatorRegistry()
-		let response = await ExecuteResponse.fromRunning(context, registry: registry)
+		let execute = try Execute(executableContext: context, registry: evaluatorRegistry())
+		let response = await execute()
 		let data =
 			try json(response, originalLocation: location)
 			.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
@@ -94,7 +94,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 	}
 }
 
-func json(_ response: ExecuteResponse, originalLocation location: SourceLocation) -> JSON {
+func json(_ response: Execute.Response, originalLocation location: SourceLocation) -> JSON {
 	let renderedString = response.rendered()
 	var jsonResult: [String: JSON] = [
 		"range": json(location..<location),

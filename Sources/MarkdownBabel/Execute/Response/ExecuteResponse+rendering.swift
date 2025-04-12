@@ -1,6 +1,6 @@
 import Markdown
 
-extension ExecuteResponse.ExecutionResult {
+extension Execute.Response.ExecutionResult {
 	fileprivate func renderedOutputBlocks(reusing oldResult: ExecutableContext.Result?) -> String? {
 		guard let output else { return nil }
 		let header: String = oldResult?.header ?? "Result:"
@@ -24,7 +24,7 @@ extension ExecuteResponse.ExecutionResult {
 	}
 }
 
-extension ExecuteResponse {
+extension Execute.Response {
 	public func rendered() -> String {
 		return [
 			// CodeBlock.format() on its own will prepend two empty newlines; a Document with just a CodeBlock won't, so we wrap it:

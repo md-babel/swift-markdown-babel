@@ -1,9 +1,9 @@
 import Foundation
 
-struct Evaluator {
-	let configuration: EvaluatorConfiguration
+public struct Evaluator {
+	public let configuration: EvaluatorConfiguration
 
-	func run(code: String) async throws -> String {
+	public func run(code: String) async throws -> String {
 		let runProcess = configuration.makeRunProcess()
 		let (result, output) = try await runProcess(input: code, additionalArguments: [])
 
