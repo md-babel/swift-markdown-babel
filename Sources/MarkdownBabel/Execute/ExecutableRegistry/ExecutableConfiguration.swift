@@ -1,34 +1,35 @@
 import struct Foundation.URL
 
-/// Represents how to start an executable process, to be stored in configuration files.
-public struct ExecutableConfiguration {
-	/// Type of Markdown node to apply the executable to.
-	public enum ResultMarkupType: Hashable, Sendable {
-		case codeBlock(language: String)
+/// Type of Markdown node to apply the executable to.
+public enum ExecutableMarkupType: Hashable, Sendable {
+	case codeBlock(language: String)
+	// case table
 
-		public var key: String {
-			switch self {
-			case .codeBlock: "codeBlock"
-			}
+	public var key: String {
+		switch self {
+		case .codeBlock: "codeBlock"
 		}
 	}
+}
 
+/// Represents how to start an executable process, to be stored in configuration files.
+public struct ExecutableConfiguration {
 	public let executableURL: URL
 	public let arguments: [String]
-	public let resultMarkupType: ResultMarkupType
+	public let executableMarkupType: ExecutableMarkupType
 
 	public init(
 		executableURL: URL,
 		arguments: [String],
-		resultMarkupType: ExecutableConfiguration.ResultMarkupType
+		executableMarkupType: ExecutableMarkupType
 	) {
 		self.executableURL = executableURL
 		self.arguments = arguments
-		self.resultMarkupType = resultMarkupType
+		self.executableMarkupType = executableMarkupType
 	}
 }
 
-extension ExecutableConfiguration.ResultMarkupType: CustomStringConvertible {
+extension ExecutableMarkupType: CustomStringConvertible {
 	public var description: String {
 		return switch self {
 		case .codeBlock(let language): "code block with language “\(language)”"

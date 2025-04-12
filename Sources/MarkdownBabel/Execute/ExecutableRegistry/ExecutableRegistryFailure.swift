@@ -1,6 +1,6 @@
 public enum ExecutableRegistryFailure: Error, Sendable, CustomStringConvertible {
 	case codeBlockWithoutLanguage
-	case configurationMissing(ExecutableConfiguration.ResultMarkupType)
+	case configurationMissing(ExecutableMarkupType)
 
 	public var description: String {
 		return switch self {
