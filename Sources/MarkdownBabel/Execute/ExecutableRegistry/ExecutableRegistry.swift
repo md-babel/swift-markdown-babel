@@ -1,7 +1,7 @@
 import Markdown
 
 public struct ExecutableRegistry {
-	public typealias Configurations = [ExecutableMarkupType: ExecutableConfiguration]
+	public typealias Configurations = [ExecutableMarkup: ExecutableConfiguration]
 
 	public let configurations: Configurations
 
@@ -28,7 +28,7 @@ extension ExecutableRegistry {
 	}
 
 	public func configuration(
-		_ type: ExecutableMarkupType
+		_ type: ExecutableMarkup
 	) throws(ExecutableRegistryFailure) -> ExecutableConfiguration {
 		guard let configuration = configurations[type]
 		else { throw .configurationMissing(type) }

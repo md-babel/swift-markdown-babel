@@ -11,14 +11,14 @@ extension ExecutableConfiguration {
 
 	static func codeBlockConfigurations(
 		fromJSON json: JSON
-	) throws -> [ExecutableMarkupType: ExecutableConfiguration] {
+	) throws -> [ExecutableMarkup: ExecutableConfiguration] {
 		guard let object = json.objectValue
 		else { throw JSON.Error.typeMismatch(.object, json) }
 		let configurations = try object.map { try ExecutableConfiguration(codeBlockFromJSON: $1, language: $0) }
 		return Dictionary(zip(configurations.map(\.executableMarkupType), configurations)) { _, new in new }
 	}
 
-	static func configurations(jsonFileAtURL url: URL) throws -> [ExecutableMarkupType: ExecutableConfiguration] {
+	static func configurations(jsonFileAtURL url: URL) throws -> [ExecutableMarkup: ExecutableConfiguration] {
 		let data = try Data(contentsOf: url)
 		let json = try JSON(data: data)
 		return try json["codeBlock"].map(ExecutableConfiguration.codeBlockConfigurations(fromJSON:)) ?? [:]
