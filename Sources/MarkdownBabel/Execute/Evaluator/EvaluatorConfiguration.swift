@@ -2,7 +2,7 @@ import struct Foundation.URL
 
 /// Represents how to start an executable process to evaluate code blocks.
 ///
-/// These are usually hydrated from configuration files. See ``ExecutableRegistry``.
+/// These are usually hydrated from configuration files. See ``EvaluatorRegistry``.
 public struct EvaluatorConfiguration: Equatable, Sendable {
 	public let executableURL: URL
 	public let arguments: [String]

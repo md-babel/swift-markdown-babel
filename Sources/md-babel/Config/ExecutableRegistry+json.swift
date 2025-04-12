@@ -2,11 +2,11 @@ import DynamicJSON
 import Foundation
 import MarkdownBabel
 
-extension ExecutableRegistry {
+extension EvaluatorRegistry {
 	static func load(
 		fromXDG loadFromXDG: Bool,
 		fromFile fileURL: URL?
-	) throws -> ExecutableRegistry {
+	) throws -> EvaluatorRegistry {
 		let xdgSource: Configurations =
 			if loadFromXDG {
 				(try? EvaluatorConfiguration.configurations(jsonFileAtURL: xdgConfigURL)) ?? [:]
@@ -20,7 +20,7 @@ extension ExecutableRegistry {
 			configurations.merge(source) { _, new in new }
 		}
 
-		return ExecutableRegistry(configurations: configurations)
+		return EvaluatorRegistry(configurations: configurations)
 	}
 
 	func json() throws -> JSON {

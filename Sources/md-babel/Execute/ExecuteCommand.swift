@@ -71,8 +71,8 @@ struct ExecuteCommand: AsyncParsableCommand {
 	)
 	var loadUserConfig = true
 
-	func executableRegistry() throws -> ExecutableRegistry {
-		return try ExecutableRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
+	func evaluatorRegistry() throws -> EvaluatorRegistry {
+		return try EvaluatorRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
 	}
 
 	// MARK: - Run
@@ -85,7 +85,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 			FileHandle.standardOutput.write(try JSON.object([:]).data())
 			return
 		}
-		let registry = try executableRegistry()
+		let registry = try evaluatorRegistry()
 		let response = await ExecuteResponse.fromRunning(context, registry: registry)
 		let data =
 			try json(response, originalLocation: location)

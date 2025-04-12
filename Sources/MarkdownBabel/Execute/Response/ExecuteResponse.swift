@@ -36,11 +36,11 @@ public struct ExecuteResponse {
 extension ExecuteResponse {
 	public static func fromRunning(
 		_ executableContext: ExecutableContext,
-		registry: ExecutableRegistry
+		registry: EvaluatorRegistry
 	) async -> Self {
 		let result = await ExecutionResult.fromRunning {
-			let executable = try registry.executable(forCodeBlock: executableContext.codeBlock)
-			return try await executable.run(code: executableContext.codeBlock.code)
+			let evaluator = try registry.evaluator(forCodeBlock: executableContext.codeBlock)
+			return try await evaluator.run(code: executableContext.codeBlock.code)
 		}
 		return self.init(
 			executableContext: executableContext,

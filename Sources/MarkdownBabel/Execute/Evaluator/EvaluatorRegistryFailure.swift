@@ -1,4 +1,4 @@
-public enum ExecutableRegistryFailure: Error, Sendable, CustomStringConvertible {
+public enum EvaluatorRegistryFailure: Error, Sendable, CustomStringConvertible {
 	case codeBlockWithoutLanguage
 	case configurationMissing(ExecutableMarkup)
 

@@ -1,6 +1,6 @@
 import Foundation
 
-struct Executable {
+struct Evaluator {
 	let configuration: EvaluatorConfiguration
 
 	func run(code: String) async throws -> String {
