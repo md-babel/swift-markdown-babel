@@ -1,4 +1,5 @@
 import ArgumentParser
+import DynamicJSON
 import Foundation
 import MarkdownBabel
 
@@ -45,7 +46,9 @@ extension ConfigCommand {
 
 		func run() throws {
 			let registry = try evaluatorRegistry()
-			let json = try registry.json()
+			let json: JSON = .object([
+				"evaluators": try registry.json()
+			])
 			let data = try json.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
 			FileHandle.standardOutput.write(data)
 		}

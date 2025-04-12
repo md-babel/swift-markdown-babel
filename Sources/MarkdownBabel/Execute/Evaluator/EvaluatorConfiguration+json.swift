@@ -20,7 +20,8 @@ extension EvaluatorConfiguration {
 	public static func configurations(jsonFileAtURL url: URL) throws -> [ExecutableMarkup: EvaluatorConfiguration] {
 		let data = try Data(contentsOf: url)
 		let json = try JSON(data: data)
-		return try json["codeBlock"].map(EvaluatorConfiguration.codeBlockConfigurations(fromJSON:)) ?? [:]
+		return try json["evaluators"]?["codeBlock"].map(EvaluatorConfiguration.codeBlockConfigurations(fromJSON:))
+			?? [:]
 	}
 
 	init(codeBlockFromJSON json: JSON, language: String) throws {
