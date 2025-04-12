@@ -1,14 +1,23 @@
 import Markdown
 
+extension Execute.Response.ExecutionResult.Output {
+	fileprivate func rendered() -> String {
+		switch self {
+		case .codeBlock(let language, let code):
+			return CodeBlock(
+				language: language,
+				code.trimmingCharacters(in: .newlines)
+			).format(options: .init(useCodeFence: .always))
+		}
+	}
+}
 extension Execute.Response.ExecutionResult {
 	fileprivate func renderedOutputBlocks(reusing oldResult: ExecutableContext.Result?) -> String? {
 		guard let output else { return nil }
 		let header: String = oldResult?.header ?? "Result:"
 		return [
 			HTMLCommentBlock(htmlBlock: HTMLBlock("<!--\(header)-->"))!.format(),
-			CodeBlock(language: nil, output.trimmingCharacters(in: .newlines)).format(
-				options: .init(useCodeFence: .always)
-			),
+			output.rendered(),
 		].joined(separator: "\n")
 	}
 

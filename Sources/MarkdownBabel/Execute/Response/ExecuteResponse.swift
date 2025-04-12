@@ -7,14 +7,24 @@ extension Execute {
 		///
 		/// The document may have both blocks, and the transformed result may contain both or neither.
 		public struct ExecutionResult: Equatable {
+			public enum Output: Equatable {
+				case codeBlock(language: String, code: String)
+
+				public var stringContent: String {
+					return switch self {
+					case .codeBlock(language: _, let code): code.trimmingCharacters(in: .newlines)
+					}
+				}
+			}
+
 			/// - Note: `nil` will remove existing result blocks from the document during interpretation.
-			public let output: String?
+			public let output: Output?
 
 			/// - Note: `nil` will remove existing result blocks from the document during interpretation.
 			public let error: String?
 
 			public init(
-				output: String? = nil,
+				output: Output? = nil,
 				error: String? = nil
 			) {
 				self.output = output
@@ -37,7 +47,7 @@ extension Execute {
 
 extension Execute.Response.ExecutionResult {
 	static func fromRunning(
-		_ block: () async throws -> String
+		_ block: () async throws -> Output
 	) async -> Self {
 		do {
 			let result = try await block()

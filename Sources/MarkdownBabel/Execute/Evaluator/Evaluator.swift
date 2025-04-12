@@ -3,7 +3,7 @@ import Foundation
 public struct Evaluator {
 	public let configuration: EvaluatorConfiguration
 
-	public func run(code: String) async throws -> String {
+	public func run(code: String) async throws -> Execute.Response.ExecutionResult.Output {
 		let runProcess = configuration.makeRunProcess()
 		let (result, output) = try await runProcess(input: code, additionalArguments: [])
 
@@ -15,14 +15,16 @@ public struct Evaluator {
 				status
 			}
 
-		let stringResult: String =
+		switch configuration.resultMarkupType {
+		case .codeBlock:
 			switch output {
 			case .data(let data):
 				throw ExecutionFailure.processResultIsNotAString(data, terminationStatus)
-			case .string(let string):
-				string
+			case .string(let code):
+				return .codeBlock(language: "", code: code)
 			}
-
-		return stringResult
+		case .image:
+			fatalError("WIP")  // FIXME: Implement image output
+		}
 	}
 }
