@@ -5,7 +5,7 @@ public struct Evaluator {
 
 	public func run(code: String) async throws -> Execute.Response.ExecutionResult.Output {
 		let runProcess = configuration.makeRunProcess()
-		let (result, output) = try await runProcess(input: code, additionalArguments: [])
+		let (result, outputData) = try await runProcess(input: code, additionalArguments: [])
 
 		let terminationStatus: RunProcess.TerminationStatus =
 			switch result {
@@ -17,12 +17,10 @@ public struct Evaluator {
 
 		switch configuration.resultMarkupType {
 		case .codeBlock:
-			switch output {
-			case .data(let data):
-				throw ExecutionFailure.processResultIsNotAString(data, terminationStatus)
-			case .string(let code):
-				return .codeBlock(language: "", code: code)
-			}
+			guard let code = String(data: outputData, encoding: .utf8)
+			else { throw ExecutionFailure.processResultIsNotAString(outputData, terminationStatus) }
+			return .codeBlock(language: "", code: code)
+
 		case .image:
 			fatalError("WIP")  // FIXME: Implement image output
 		}
