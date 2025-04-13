@@ -1,6 +1,6 @@
 import Markdown
 
-extension Execute.Response.ExecutionResult.Output {
+extension Execute.Response.ExecutionResult.Insert {
 	fileprivate func rendered() -> String {
 		switch self {
 		case .codeBlock(let language, let code):
@@ -11,6 +11,13 @@ extension Execute.Response.ExecutionResult.Output {
 		}
 	}
 }
+
+extension Execute.Response.ExecutionResult.Output {
+	fileprivate func rendered() -> String {
+		return self.insert.rendered()
+	}
+}
+
 extension Execute.Response.ExecutionResult {
 	fileprivate func renderedOutputBlocks(reusing oldResult: ExecutableContext.Result?) -> String? {
 		guard let output else { return nil }

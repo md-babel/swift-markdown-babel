@@ -102,7 +102,7 @@ func json(_ response: Execute.Response, originalLocation location: SourceLocatio
 		"replacementString": .string(renderedString),
 	]
 	if let output = response.executionResult.output {
-		jsonResult["result"] = .string(output.stringContent)
+		jsonResult["result"] = .string(output.insert.stringContent)
 	}
 	if let error = response.executionResult.error {
 		jsonResult["error"] = .string(error)

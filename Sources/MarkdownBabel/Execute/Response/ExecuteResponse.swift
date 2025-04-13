@@ -1,3 +1,6 @@
+import struct Foundation.Data
+import struct Foundation.URL
+
 extension Execute {
 	/// Response for `md-babel exec`.
 	public struct Response {
@@ -7,13 +10,30 @@ extension Execute {
 		///
 		/// The document may have both blocks, and the transformed result may contain both or neither.
 		public struct ExecutionResult: Equatable {
-			public enum Output: Equatable {
+			public enum Insert: Equatable {
 				case codeBlock(language: String, code: String)
 
 				public var stringContent: String {
 					return switch self {
 					case .codeBlock(language: _, let code): code.trimmingCharacters(in: .newlines)
 					}
+				}
+			}
+
+			public enum SideEffect: Equatable {
+				case writeFile(Data, URL)
+			}
+
+			public struct Output: Equatable {
+				public let insert: Insert
+				public let sideEffect: SideEffect?
+
+				public init(
+					insert: Execute.Response.ExecutionResult.Insert,
+					sideEffect: Execute.Response.ExecutionResult.SideEffect? = nil
+				) {
+					self.insert = insert
+					self.sideEffect = sideEffect
 				}
 			}
 
@@ -41,19 +61,6 @@ extension Execute {
 		) {
 			self.executableContext = executableContext
 			self.executionResult = executionResult
-		}
-	}
-}
-
-extension Execute.Response.ExecutionResult {
-	static func fromRunning(
-		_ block: () async throws -> Output
-	) async -> Self {
-		do {
-			let result = try await block()
-			return Self(output: result, error: nil)
-		} catch {
-			return Self(output: nil, error: "\(error)")
 		}
 	}
 }

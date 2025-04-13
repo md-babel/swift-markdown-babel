@@ -26,9 +26,7 @@ public struct Execute {
 	}
 
 	public func execute() async -> Response {
-		let result = await Response.ExecutionResult.fromRunning {
-			return try await evaluator.run(code: executableContext.codeBlock.code)
-		}
+		let result = await evaluator.result(fromRunning: executableContext.codeBlock.code)
 		return Response(
 			executableContext: executableContext,
 			executionResult: result
