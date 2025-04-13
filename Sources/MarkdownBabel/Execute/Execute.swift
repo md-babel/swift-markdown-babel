@@ -1,0 +1,25 @@
+public struct Execute {
+	let executableContext: ExecutableContext
+	let evaluator: Evaluator
+
+	public init(
+		executableContext: ExecutableContext,
+		evaluator: Evaluator
+	) {
+		self.executableContext = executableContext
+		self.evaluator = evaluator
+	}
+
+	@inlinable @inline(__always)
+	public func callAsFunction() async -> Response {
+		return await execute()
+	}
+
+	public func execute() async -> Response {
+		let result = await evaluator.result(fromRunning: executableContext.codeBlock.code)
+		return Response(
+			executableContext: executableContext,
+			executionResult: result
+		)
+	}
+}

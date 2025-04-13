@@ -1,6 +1,7 @@
-public enum ExecutableRegistryFailure: Error, Sendable, CustomStringConvertible {
+public enum EvaluatorRegistryFailure: Error, Sendable, CustomStringConvertible {
 	case codeBlockWithoutLanguage
-	case configurationMissing(ExecutableConfiguration.ResultMarkupType)
+	case configurationMissing(ExecutableMarkup)
+	case directoryLookupFailed(String)
 
 	public var description: String {
 		return switch self {
@@ -8,6 +9,8 @@ public enum ExecutableRegistryFailure: Error, Sendable, CustomStringConvertible 
 			"Code block doesn't have a language"
 		case .configurationMissing(let type):
 			"Configuration missing to execute \(type)."
+		case .directoryLookupFailed(let message):
+			"Directory lookup failed: \(message)"
 		}
 	}
 }

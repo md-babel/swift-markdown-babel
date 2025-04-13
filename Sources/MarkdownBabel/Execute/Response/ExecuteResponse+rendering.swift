@@ -1,14 +1,32 @@
 import Markdown
 
-extension ExecuteResponse.ExecutionResult {
+extension Execute.Response.ExecutionResult.Insert {
+	fileprivate func rendered() -> String {
+		switch self {
+		case .codeBlock(let language, let code):
+			return CodeBlock(
+				language: language,
+				code.trimmingCharacters(in: .newlines)
+			).format(options: .init(useCodeFence: .always))
+		case .image(let path, let hash):
+			return "![\(hash ?? "")](\(path))"
+		}
+	}
+}
+
+extension Execute.Response.ExecutionResult.Output {
+	fileprivate func rendered() -> String {
+		return self.insert.rendered()
+	}
+}
+
+extension Execute.Response.ExecutionResult {
 	fileprivate func renderedOutputBlocks(reusing oldResult: ExecutableContext.Result?) -> String? {
 		guard let output else { return nil }
 		let header: String = oldResult?.header ?? "Result:"
 		return [
 			HTMLCommentBlock(htmlBlock: HTMLBlock("<!--\(header)-->"))!.format(),
-			CodeBlock(language: nil, output.trimmingCharacters(in: .newlines)).format(
-				options: .init(useCodeFence: .always)
-			),
+			output.rendered(),
 		].joined(separator: "\n")
 	}
 
@@ -24,7 +42,7 @@ extension ExecuteResponse.ExecutionResult {
 	}
 }
 
-extension ExecuteResponse {
+extension Execute.Response {
 	public func rendered() -> String {
 		return [
 			// CodeBlock.format() on its own will prepend two empty newlines; a Document with just a CodeBlock won't, so we wrap it:

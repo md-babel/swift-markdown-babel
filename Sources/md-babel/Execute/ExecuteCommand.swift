@@ -71,8 +71,8 @@ struct ExecuteCommand: AsyncParsableCommand {
 	)
 	var loadUserConfig = true
 
-	func executableRegistry() throws -> ExecutableRegistry {
-		return try ExecutableRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
+	func evaluatorRegistry() throws -> EvaluatorRegistry {
+		return try EvaluatorRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
 	}
 
 	// MARK: - Run
@@ -85,8 +85,18 @@ struct ExecuteCommand: AsyncParsableCommand {
 			FileHandle.standardOutput.write(try JSON.object([:]).data())
 			return
 		}
-		let registry = try executableRegistry()
-		let response = await ExecuteResponse.fromRunning(context, registry: registry)
+		let evaluator = Evaluator(
+			configuration: try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock),
+			generateImageFileURL: GenerateImageFileURL(
+				outputDirectory: try outputDirectory(),
+				fileExtension: "svg"  // TODO: Make file extension configurable in converter https://github.com/md-babel/swift-markdown-babel/issues/20
+			)
+		)
+		let execute = Execute(executableContext: context, evaluator: evaluator)
+		let response = await execute()
+
+		try perform(sideEffect: response.executionResult.output?.sideEffect)
+
 		let data =
 			try json(response, originalLocation: location)
 			.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
@@ -94,7 +104,50 @@ struct ExecuteCommand: AsyncParsableCommand {
 	}
 }
 
-func json(_ response: ExecuteResponse, originalLocation location: SourceLocation) -> JSON {
+extension ExecuteCommand {
+	func outputDirectory(
+		outputPath: String? = nil
+	) throws(EvaluatorRegistryFailure) -> URL {
+		guard let outputPath else {
+			return try makeTemporaryOutputDirectory()
+		}
+		return try directory(forPath: outputPath)
+	}
+
+	private func makeTemporaryOutputDirectory() throws(EvaluatorRegistryFailure) -> URL {
+		let tmpDir = FileManager.default.temporaryDirectory
+
+		do {
+			try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
+			return tmpDir
+		} catch let error {
+			throw .directoryLookupFailed("Could not create temporary directory at “\(tmpDir)”: \(error)")
+		}
+	}
+
+	private func directory(forPath path: String) throws(EvaluatorRegistryFailure) -> URL {
+		var isDirectory: ObjCBool = false
+		let pathExists = FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+		guard pathExists else {
+			throw .directoryLookupFailed("Output directory at “\(path)” does not exist")
+		}
+		guard isDirectory.boolValue == true else {
+			throw .directoryLookupFailed("Output path at “\(path)” is not a directory")
+		}
+		return URL(fileURLWithPath: path, isDirectory: true)
+	}
+}
+
+func perform(sideEffect: SideEffect?) throws {
+	switch sideEffect {
+	case .writeFile(let data, let url):
+		try data.write(to: url)
+	case .none:
+		break
+	}
+}
+
+func json(_ response: Execute.Response, originalLocation location: SourceLocation) -> JSON {
 	let renderedString = response.rendered()
 	var jsonResult: [String: JSON] = [
 		"range": json(location..<location),
@@ -102,7 +155,7 @@ func json(_ response: ExecuteResponse, originalLocation location: SourceLocation
 		"replacementString": .string(renderedString),
 	]
 	if let output = response.executionResult.output {
-		jsonResult["result"] = .string(output)
+		jsonResult["result"] = .string(output.insert.stringContent)
 	}
 	if let error = response.executionResult.error {
 		jsonResult["error"] = .string(error)

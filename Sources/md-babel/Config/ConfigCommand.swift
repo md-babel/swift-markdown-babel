@@ -1,4 +1,5 @@
 import ArgumentParser
+import DynamicJSON
 import Foundation
 import MarkdownBabel
 
@@ -39,13 +40,15 @@ extension ConfigCommand {
 		)
 		var configFile: URL?
 
-		func executableRegistry() throws -> ExecutableRegistry {
-			return try ExecutableRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
+		func evaluatorRegistry() throws -> EvaluatorRegistry {
+			return try EvaluatorRegistry.load(fromXDG: self.loadUserConfig, fromFile: configFile)
 		}
 
 		func run() throws {
-			let registry = try executableRegistry()
-			let json = try registry.json()
+			let registry = try evaluatorRegistry()
+			let json: JSON = .object([
+				"evaluators": try registry.json()
+			])
 			let data = try json.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
 			FileHandle.standardOutput.write(data)
 		}
