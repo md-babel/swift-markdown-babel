@@ -85,17 +85,25 @@ The key is the code block language, and the object contains an absolute `"path"`
 You can pass `"defaultArguments"` to influence how the program is executed.
 See the [`md-babel:config` schema][config-schema] for details.
 
-Here's a simple example for shell scripts:
+Here's a simple example for shell scripts and Python:
 
 ```json
 {
-  "sh": {
-    "path": "/usr/bin/env",
-    "defaultArguments": ["sh"]
-  },
-  "bash": {
-    "path": "/usr/bin/env",
-    "defaultArguments": ["bash"]
+  "evaluators": {
+	"codeBlock" : {
+      "sh": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["sh"]
+      },
+      "bash": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["bash"]
+      },
+      "python": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["python3"]
+      }
+    }
   }
 }
 ```
