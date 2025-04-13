@@ -9,8 +9,8 @@ extension Execute {
 		///     (ExecutableBlock, Result?, Error?) -> (ExecutableBlock, Result?, Error?)
 		///
 		/// The document may have both blocks, and the transformed result may contain both or neither.
-		public struct ExecutionResult: Equatable {
-			public enum Insert: Equatable {
+		public struct ExecutionResult: Equatable, Sendable {
+			public enum Insert: Equatable, Sendable {
 				case codeBlock(language: String, code: String)
 				case image(path: String, hash: String?)
 
@@ -22,11 +22,11 @@ extension Execute {
 				}
 			}
 
-			public enum SideEffect: Equatable {
+			public enum SideEffect: Equatable, Sendable {
 				case writeFile(Data, to: URL)
 			}
 
-			public struct Output: Equatable {
+			public struct Output: Equatable, Sendable {
 				public let insert: Insert
 				public let sideEffect: SideEffect?
 
