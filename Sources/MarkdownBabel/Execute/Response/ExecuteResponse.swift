@@ -22,17 +22,13 @@ extension Execute {
 				}
 			}
 
-			public enum SideEffect: Equatable, Sendable {
-				case writeFile(Data, to: URL)
-			}
-
 			public struct Output: Equatable, Sendable {
 				public let insert: Insert
 				public let sideEffect: SideEffect?
 
 				public init(
 					insert: Execute.Response.ExecutionResult.Insert,
-					sideEffect: Execute.Response.ExecutionResult.SideEffect? = nil
+					sideEffect: SideEffect? = nil
 				) {
 					self.insert = insert
 					self.sideEffect = sideEffect
