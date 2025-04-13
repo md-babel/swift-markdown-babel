@@ -87,6 +87,14 @@ struct ExecuteCommand: AsyncParsableCommand {
 		}
 		let execute = try Execute(executableContext: context, registry: evaluatorRegistry())
 		let response = await execute()
+
+		switch response.executionResult.output?.sideEffect {
+		case .writeFile(let data, let url):
+			try data.write(to: url)
+		case .none:
+			break
+		}
+
 		let data =
 			try json(response, originalLocation: location)
 			.data(formatting: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])

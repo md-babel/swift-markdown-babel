@@ -82,6 +82,7 @@ struct RunProcess {
 		proc.arguments = arguments
 		proc.standardInput = inputPipe
 		proc.standardOutput = outputPipe
+		// TODO: capture standard error https://github.com/md-babel/swift-markdown-babel/issues/22
 		group.enter()
 		proc.terminationHandler = { _ in
 			// This bounce to the main queue is important; read the comment near the `run()` call to understand why.
