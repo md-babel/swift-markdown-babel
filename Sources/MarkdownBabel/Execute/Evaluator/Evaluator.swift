@@ -1,7 +1,9 @@
+import Crypto
 import Foundation
 
-public struct Evaluator {
+public struct Evaluator: Sendable {
 	public let configuration: EvaluatorConfiguration
+	public let generateImageFileURL: GenerateImageFileURL
 
 	public func result(fromRunning code: String) async -> Execute.Response.ExecutionResult {
 		do {
@@ -34,7 +36,15 @@ public struct Evaluator {
 			)
 
 		case .image:
-			fatalError("WIP")  // FIXME: Implement image output
+			guard let hashContent = ContentHash(string: code, encoding: .utf8)
+			else { throw ExecutionFailure.hashingContentFailed(code) }
+			let hash: String = hashContent()
+			let filename = "rendered-" + hash  // TODO: Make filename pattern configurable https://github.com/md-babel/swift-markdown-babel/issues/20
+			let imageURL: URL = generateImageFileURL(filename: filename)
+			return .init(
+				insert: .image(path: imageURL.path(), hash: hash),
+				sideEffect: .writeFile(outputData, to: imageURL)
+			)
 		}
 	}
 }

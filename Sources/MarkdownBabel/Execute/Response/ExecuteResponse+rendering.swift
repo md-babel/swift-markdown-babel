@@ -8,6 +8,8 @@ extension Execute.Response.ExecutionResult.Insert {
 				language: language,
 				code.trimmingCharacters(in: .newlines)
 			).format(options: .init(useCodeFence: .always))
+		case .image(let path, let hash):
+			return "![\(hash ?? "")](\(path))"
 		}
 	}
 }

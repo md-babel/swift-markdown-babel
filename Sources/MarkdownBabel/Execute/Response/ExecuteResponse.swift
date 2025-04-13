@@ -12,16 +12,18 @@ extension Execute {
 		public struct ExecutionResult: Equatable {
 			public enum Insert: Equatable {
 				case codeBlock(language: String, code: String)
+				case image(path: String, hash: String?)
 
 				public var stringContent: String {
 					return switch self {
 					case .codeBlock(language: _, let code): code.trimmingCharacters(in: .newlines)
+					case .image(let path, hash: _): path
 					}
 				}
 			}
 
 			public enum SideEffect: Equatable {
-				case writeFile(Data, URL)
+				case writeFile(Data, to: URL)
 			}
 
 			public struct Output: Equatable {
