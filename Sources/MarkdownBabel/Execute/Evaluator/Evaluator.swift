@@ -5,6 +5,11 @@ public struct Evaluator: Sendable {
 	public let configuration: EvaluatorConfiguration
 	public let generateImageFileURL: GenerateImageFileURL
 
+	public init(configuration: EvaluatorConfiguration, generateImageFileURL: GenerateImageFileURL) {
+		self.configuration = configuration
+		self.generateImageFileURL = generateImageFileURL
+	}
+
 	public func result(fromRunning code: String) async -> Execute.Response.ExecutionResult {
 		do {
 			let result = try await run(code: code)

@@ -10,16 +10,6 @@ public struct Execute {
 		self.evaluator = evaluator
 	}
 
-	public init(
-		executableContext: ExecutableContext,
-		registry: EvaluatorRegistry
-	) throws(EvaluatorRegistryFailure) {
-		self.init(
-			executableContext: executableContext,
-			evaluator: try registry.evaluator(forCodeBlock: executableContext.codeBlock)
-		)
-	}
-
 	@inlinable @inline(__always)
 	public func callAsFunction() async -> Response {
 		return await execute()
