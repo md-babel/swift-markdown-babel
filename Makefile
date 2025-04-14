@@ -3,6 +3,9 @@ release/md-babel_linux-amd64.tar.bz2 release/md-babel_linux-arm64.tar.bz2 &:
 	tar --create --bzip2 --file release/md-babel_linux-amd64.tar.bz2 --directory release/linux_amd64 md-babel
 	tar --create --bzip2 --file release/md-babel_linux-arm64.tar.bz2 --directory release/linux_arm64 md-babel
 
+.PHONY: clean
+clean:
+	rm -rf release/*.tar.bz2 release/linux_*
 
 .PHONY: release
 release: release/md-babel_linux-arm64.tar.bz2 release/md-babel_linux-amd64.tar.bz2
