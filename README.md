@@ -90,7 +90,7 @@ Here's a simple example for shell scripts and Python:
 ```json
 {
   "evaluators": {
-	"codeBlock" : {
+    "codeBlock" : {
       "sh": {
         "path": "/usr/bin/env",
         "defaultArguments": ["sh"]
