@@ -85,8 +85,8 @@ struct ExecuteCommand: AsyncParsableCommand {
 			FileHandle.standardOutput.write(try JSON.object([:]).data())
 			return
 		}
-		let evaluator = Evaluator(
-			configuration: try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock),
+		let configuration = try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock)
+		let evaluator = configuration.makeEvaluator(
 			generateImageFileURL: GenerateImageFileURL(
 				outputDirectory: try outputDirectory(),
 				fileExtension: "svg"  // TODO: Make file extension configurable in converter https://github.com/md-babel/swift-markdown-babel/issues/20

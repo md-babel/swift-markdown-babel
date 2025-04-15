@@ -37,3 +37,16 @@ extension EvaluatorConfiguration {
 		)
 	}
 }
+
+extension EvaluatorConfiguration {
+	public func makeEvaluator(
+		generateImageFileURL: GenerateImageFileURL
+	) -> any Evaluator {
+		switch (self.executableMarkupType, self.resultMarkupType) {
+		case (.codeBlock, .codeBlock):
+			return CodeToCodeEvaluator(configuration: self)
+		case (.codeBlock, .image):
+			return CodeToImageEvaluator(configuration: self, generateImageFileURL: generateImageFileURL)
+		}
+	}
+}

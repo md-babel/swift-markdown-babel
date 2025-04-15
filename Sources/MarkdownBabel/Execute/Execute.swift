@@ -1,10 +1,10 @@
 public struct Execute {
 	let executableContext: ExecutableContext
-	let evaluator: Evaluator
+	let evaluator: any Evaluator
 
 	public init(
 		executableContext: ExecutableContext,
-		evaluator: Evaluator
+		evaluator: any Evaluator
 	) {
 		self.executableContext = executableContext
 		self.evaluator = evaluator
@@ -16,7 +16,14 @@ public struct Execute {
 	}
 
 	public func execute() async -> Response {
-		let result = await evaluator.result(fromRunning: executableContext.codeBlock.code)
+		let result: Execute.Response.ExecutionResult
+		do {
+			let output = try await evaluator.run(executableContext.codeBlock.code)
+			result = .init(output: output, error: nil)
+		} catch {
+			result = .init(output: nil, error: "\(error)")
+		}
+
 		return Response(
 			executableContext: executableContext,
 			executionResult: result
