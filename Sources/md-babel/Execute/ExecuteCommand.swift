@@ -85,15 +85,15 @@ struct ExecuteCommand: AsyncParsableCommand {
 			FileHandle.standardOutput.write(try JSON.object([:]).data())
 			return
 		}
-		let evaluator = Evaluator(
-			configuration: try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock),
+		let configuration = try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock)
+		let evaluator = configuration.makeEvaluator(
 			generateImageFileURL: GenerateImageFileURL(
 				outputDirectory: try outputDirectory(),
 				fileExtension: "svg"  // TODO: Make file extension configurable in converter https://github.com/md-babel/swift-markdown-babel/issues/20
 			)
 		)
 		let execute = Execute(executableContext: context, evaluator: evaluator)
-		let response = await execute()
+		let response = await execute(sourceURL: inputFile)
 
 		try perform(sideEffect: response.executionResult.output?.sideEffect)
 
@@ -141,6 +141,7 @@ extension ExecuteCommand {
 func perform(sideEffect: SideEffect?) throws {
 	switch sideEffect {
 	case .writeFile(let data, let url):
+		try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
 		try data.write(to: url)
 	case .none:
 		break

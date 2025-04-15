@@ -9,15 +9,15 @@ public struct GenerateImageFileURL: Sendable {
 		self.fileExtension = fileExtension
 	}
 
-	public func url(filename: String) -> URL {
+	public func url(filename: String, directory: String) -> URL {
 		return
-			outputDirectory
+			URL(fileURLWithPath: directory, relativeTo: outputDirectory)
 			.appending(path: filename)
 			.appendingPathExtension(fileExtension)
 	}
 
 	@inlinable @inline(__always)
-	public func callAsFunction(filename: String) -> URL {
-		return url(filename: filename)
+	public func callAsFunction(filename: String, directory: String) -> URL {
+		return url(filename: filename, directory: directory)
 	}
 }

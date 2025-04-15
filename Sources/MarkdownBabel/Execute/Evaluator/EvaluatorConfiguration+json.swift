@@ -5,7 +5,7 @@ extension EvaluatorConfiguration {
 	struct Representation: Codable {
 		let path: String
 		let defaultArguments: [String]
-		let result: String
+		let result: Either<String, [String: String]>
 	}
 
 	public static func codeBlockConfigurations(
@@ -26,19 +26,40 @@ extension EvaluatorConfiguration {
 
 	init(codeBlockFromJSON json: JSON, language: String) throws {
 		let rep: Representation = try json.coerce()
+
+		let resultMarkupType: EvaluationResultMarkup
+		switch rep.result {
+		case .left("codeBlock"):
+			resultMarkupType = .codeBlock
+		case .right(let dictionary) where dictionary["type"] == "image":
+			resultMarkupType = .image(
+				fileExtension: try dictionary.ensureValue("extension"),
+				directory: try dictionary.ensureValue("directory"),
+				filenamePattern: try dictionary.ensureValue("filename")
+			)
+		default:
+			throw UnrecognizedEvaluationResult(type: rep.result)
+		}
+
 		self.init(
 			executableURL: URL(fileURLWithPath: rep.path),
 			arguments: rep.defaultArguments,
 			executableMarkupType: .codeBlock(language: language),
-			resultMarkupType: try EvaluationResultMarkup(string: rep.result)
+			resultMarkupType: resultMarkupType
 		)
 	}
 
 	public func json() throws -> JSON {
-		let resultMarkupType =
+		let resultMarkupType: Either<String, [String: String]> =
 			switch self.resultMarkupType {
-			case .codeBlock: "codeBlock"
-			case .image: "image"
+			case .codeBlock: .left("codeBlock")
+			case .image(let config):
+				.right([
+					"type": "image",
+					"extension": config.fileExtension,
+					"directory": config.directory,
+					"filename": config.filenamePattern,
+				])
 			}
 		let rep = Representation(
 			path: self.executableURL.path(),
@@ -46,5 +67,22 @@ extension EvaluatorConfiguration {
 			result: resultMarkupType
 		)
 		return try JSON(encodable: rep)
+	}
+}
+
+extension Dictionary where Key: Sendable, Value: Sendable {
+	public struct DictionaryKeyMissing: Error {
+		public let key: Key
+		public let dictionary: [Key: Value]
+
+		public init(key: Key, dictionary: [Key: Value]) {
+			self.key = key
+			self.dictionary = dictionary
+		}
+	}
+
+	func ensureValue(_ key: Self.Key) throws -> Self.Value {
+		guard let value = self[key] else { throw DictionaryKeyMissing(key: key, dictionary: self) }
+		return value
 	}
 }
