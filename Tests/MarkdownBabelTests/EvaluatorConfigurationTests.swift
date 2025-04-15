@@ -45,7 +45,12 @@ import Testing
 			  "dot": {
 			    "path": "/usr/bin/env",
 			    "defaultArguments": ["dot", "-Tsvg"],
-			    "result": "image"
+			    "result": {
+			      "type": "image",
+			      "directory": "/tmp/dir",
+			      "pattern": "filename",
+			      "extension": "svg"
+			    }
 			  },
 			  "python": {
 			    "path": "/usr/bin/env",
@@ -68,7 +73,7 @@ import Testing
 					executablePath: "/usr/bin/env",
 					arguments: ["dot", "-Tsvg"],
 					executableMarkupType: .codeBlock(language: "dot"),
-					resultMarkupType: .image
+					resultMarkupType: .image(fileExtension: "svg", directory: "/tmp/dir", filenamePattern: "filename")
 				),
 				.codeBlock(language: "python"): EvaluatorConfiguration(
 					executablePath: "/usr/bin/env",
