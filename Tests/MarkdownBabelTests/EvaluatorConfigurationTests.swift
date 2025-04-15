@@ -48,7 +48,7 @@ import Testing
 			    "result": {
 			      "type": "image",
 			      "directory": "/tmp/dir",
-			      "pattern": "filename",
+			      "filename": "a filename pattern",
 			      "extension": "svg"
 			    }
 			  },
@@ -73,7 +73,11 @@ import Testing
 					executablePath: "/usr/bin/env",
 					arguments: ["dot", "-Tsvg"],
 					executableMarkupType: .codeBlock(language: "dot"),
-					resultMarkupType: .image(fileExtension: "svg", directory: "/tmp/dir", filenamePattern: "filename")
+					resultMarkupType: .image(
+						fileExtension: "svg",
+						directory: "/tmp/dir",
+						filenamePattern: "a filename pattern"
+					)
 				),
 				.codeBlock(language: "python"): EvaluatorConfiguration(
 					executablePath: "/usr/bin/env",

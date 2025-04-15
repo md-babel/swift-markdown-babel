@@ -5,10 +5,16 @@ import struct Foundation.URL
 
 public struct CodeToImageEvaluator: Evaluator, Sendable {
 	public let configuration: EvaluatorConfiguration
+	public let imageConfiguration: ImageEvaluationConfiguration
 	public let generateImageFileURL: GenerateImageFileURL
 
 	public init(configuration: EvaluatorConfiguration, generateImageFileURL: GenerateImageFileURL) {
+		precondition({ if case .codeBlock = configuration.executableMarkupType { true } else { false } }())
+		guard case .image(let imageConfiguration) = configuration.resultMarkupType else {
+			preconditionFailure("Tried to initialize image evaluator with non-image configuration: \(configuration)")
+		}
 		self.configuration = configuration
+		self.imageConfiguration = imageConfiguration
 		self.generateImageFileURL = generateImageFileURL
 	}
 
@@ -22,10 +28,15 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 		)
 
 		let hash: String = hashContent()
-		let filename = "rendered-" + hash  // TODO: Make filename pattern configurable https://github.com/md-babel/swift-markdown-babel/issues/20
-		let imageURL: URL = generateImageFileURL(filename: filename)
+		let sourceFilename = ""  // TODO: Make filename pattern configurable https://github.com/md-babel/swift-markdown-babel/issues/20
+		let filename = filename(
+			pattern: imageConfiguration.filenamePattern,
+			sourceFilename: sourceFilename,
+			contentHash: hash
+		)
+		let imageURL: URL = generateImageFileURL(filename: filename, directory: imageConfiguration.directory)
 		return .init(
-			insert: .image(path: imageURL.path(), hash: hash),
+			insert: .image(path: imageURL.absoluteURL.path, hash: hash),
 			sideEffect: .writeFile(outputData, to: imageURL)
 		)
 	}

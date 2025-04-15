@@ -7,7 +7,15 @@ public struct UnrecognizedEvaluationResult: Error, CustomStringConvertible {
 /// Type of Markdown node execution result is produced to.
 public enum EvaluationResultMarkup: Hashable, Sendable {
 	case codeBlock
-	case image(fileExtension: String, directory: String, filenamePattern: String)
+	case image(ImageEvaluationConfiguration)
+
+	public static func image(
+		fileExtension: String,
+		directory: String,
+		filenamePattern: String
+	) -> EvaluationResultMarkup {
+		return .image(.init(fileExtension: fileExtension, directory: directory, filenamePattern: filenamePattern))
+	}
 }
 
 extension EvaluationResultMarkup: CustomStringConvertible {
@@ -15,8 +23,8 @@ extension EvaluationResultMarkup: CustomStringConvertible {
 		return switch self {
 		case .codeBlock:
 			"code block"
-		case .image(let fileExtension, let directory, filenamePattern: let pattern):
-			"image (\(directory)/\(pattern).\(fileExtension))"
+		case .image(let config):
+			"image (\(config.directory)/\(config.filenamePattern).\(config.fileExtension))"
 		}
 	}
 }

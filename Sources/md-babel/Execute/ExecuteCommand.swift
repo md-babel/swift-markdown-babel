@@ -141,6 +141,7 @@ extension ExecuteCommand {
 func perform(sideEffect: SideEffect?) throws {
 	switch sideEffect {
 	case .writeFile(let data, let url):
+		try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
 		try data.write(to: url)
 	case .none:
 		break

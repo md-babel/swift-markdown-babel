@@ -32,13 +32,10 @@ extension EvaluatorConfiguration {
 		case .left("codeBlock"):
 			resultMarkupType = .codeBlock
 		case .right(let dictionary) where dictionary["type"] == "image":
-			let fileExtension = try dictionary.ensureValue("extension")
-			let directory = try dictionary.ensureValue("directory")
-			let pattern = try dictionary.ensureValue("pattern")
 			resultMarkupType = .image(
-				fileExtension: fileExtension,
-				directory: directory,
-				filenamePattern: pattern
+				fileExtension: try dictionary.ensureValue("extension"),
+				directory: try dictionary.ensureValue("directory"),
+				filenamePattern: try dictionary.ensureValue("filename")
 			)
 		default:
 			throw UnrecognizedEvaluationResult(type: rep.result)
@@ -56,12 +53,12 @@ extension EvaluatorConfiguration {
 		let resultMarkupType: Either<String, [String: String]> =
 			switch self.resultMarkupType {
 			case .codeBlock: .left("codeBlock")
-			case .image(let fileExtension, let directory, filenamePattern: let pattern):
+			case .image(let config):
 				.right([
 					"type": "image",
-					"extension": fileExtension,
-					"directory": directory,
-					"pattern": pattern,
+					"extension": config.fileExtension,
+					"directory": config.directory,
+					"filename": config.filenamePattern,
 				])
 			}
 		let rep = Representation(
