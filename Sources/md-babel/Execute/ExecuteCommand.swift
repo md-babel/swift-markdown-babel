@@ -93,7 +93,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 			)
 		)
 		let execute = Execute(executableContext: context, evaluator: evaluator)
-		let response = await execute()
+		let response = await execute(sourceURL: inputFile)
 
 		try perform(sideEffect: response.executionResult.output?.sideEffect)
 

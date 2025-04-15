@@ -4,9 +4,14 @@ import struct Foundation.URL
 ///
 /// These are usually hydrated from configuration files. See ``EvaluatorRegistry``.
 public struct EvaluatorConfiguration: Equatable, Sendable {
+	/// Path to the program to execute during evaluation.
 	public let executableURL: URL
+	/// Command-line arguments to pass to the program during evaluation.
 	public let arguments: [String]
+
+	/// Type of the source block to evaluate.
 	public let executableMarkupType: ExecutableMarkup
+	/// Type of the output to produce.
 	public let resultMarkupType: EvaluationResultMarkup
 
 	public init(

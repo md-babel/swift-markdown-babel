@@ -1,4 +1,5 @@
 import struct Foundation.Data
+import struct Foundation.URL
 
 public struct CodeToCodeEvaluator: Evaluator, Sendable {
 	public let configuration: EvaluatorConfiguration
@@ -7,7 +8,10 @@ public struct CodeToCodeEvaluator: Evaluator, Sendable {
 		self.configuration = configuration
 	}
 
-	public func run(_ code: String) async throws -> Execute.Response.ExecutionResult.Output {
+	public func run(
+		_ code: String,
+		sourceURL: URL?
+	) async throws -> Execute.Response.ExecutionResult.Output {
 		let (terminationStatus, outputData) = try await runProcess(
 			configuration: self.configuration,
 			standardInput: code

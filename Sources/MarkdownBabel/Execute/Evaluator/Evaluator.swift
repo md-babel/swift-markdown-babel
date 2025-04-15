@@ -1,7 +1,11 @@
 import struct Foundation.Data
+import struct Foundation.URL
 
 public protocol Evaluator: Sendable {
-	func run(_ input: String) async throws -> Execute.Response.ExecutionResult.Output
+	func run(
+		_ input: String,
+		sourceURL: URL?
+	) async throws -> Execute.Response.ExecutionResult.Output
 }
 
 extension Evaluator {

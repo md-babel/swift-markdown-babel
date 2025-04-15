@@ -1,3 +1,5 @@
+import struct Foundation.URL
+
 public struct Execute {
 	let executableContext: ExecutableContext
 	let evaluator: any Evaluator
@@ -11,14 +13,14 @@ public struct Execute {
 	}
 
 	@inlinable @inline(__always)
-	public func callAsFunction() async -> Response {
-		return await execute()
+	public func callAsFunction(sourceURL: URL?) async -> Response {
+		return await execute(sourceURL: sourceURL)
 	}
 
-	public func execute() async -> Response {
+	public func execute(sourceURL: URL?) async -> Response {
 		let result: Execute.Response.ExecutionResult
 		do {
-			let output = try await evaluator.run(executableContext.codeBlock.code)
+			let output = try await evaluator.run(executableContext.codeBlock.code, sourceURL: sourceURL)
 			result = .init(output: output, error: nil)
 		} catch {
 			result = .init(output: nil, error: "\(error)")

@@ -18,7 +18,10 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 		self.generateImageFileURL = generateImageFileURL
 	}
 
-	public func run(_ code: String) async throws -> Execute.Response.ExecutionResult.Output {
+	public func run(
+		_ code: String,
+		sourceURL: URL?
+	) async throws -> Execute.Response.ExecutionResult.Output {
 		guard let hashContent = ContentHash(string: code, encoding: .utf8)
 		else { throw ExecutionFailure.hashingContentFailed(code) }
 
@@ -28,7 +31,7 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 		)
 
 		let hash: String = hashContent()
-		let sourceFilename = ""  // TODO: Make filename pattern configurable https://github.com/md-babel/swift-markdown-babel/issues/20
+		let sourceFilename = sourceURL?.deletingPathExtension().lastPathComponent ?? "STDIN"
 		let filename = filename(
 			pattern: imageConfiguration.filenamePattern,
 			sourceFilename: sourceFilename,
