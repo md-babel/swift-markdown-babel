@@ -17,6 +17,7 @@ private func fn(
 		sourceFilename: sourceFilename,
 		contentHash: contentHash,
 		locale: Locale(identifier: localeIdentifier),
+		timeZone: .gmt,
 		now: nowStub
 	)
 }
@@ -70,7 +71,7 @@ private func fn(
 	}
 
 	@Test(arguments: [
-		("yyyyMMdd'T'HHmmss'--$fn__$hash'", "20250907T093512--Weird yyyy Filename__d34db33f"),
+		("yyyyMMdd'T'HHmmss'--$fn__$hash'", "20250907T073512--Weird yyyy Filename__d34db33f"),
 		("yyyyMMdd '$fn'", "20250907 Weird yyyy Filename"),
 		("'rendered-$hash'", "rendered-d34db33f"),
 	]) func mixedRealWorldPatterns(pattern: String, expectedFilename: String) {
