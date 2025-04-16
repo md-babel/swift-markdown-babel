@@ -14,12 +14,16 @@ let package = Package(
 		.package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.5.0"),
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
 		.package(url: "https://github.com/objecthub/swift-dynamicjson.git", from: "1.0.1"),
+		// CryptoKit drop-in replacement, used for hashing
+		.package(url: "https://github.com/apple/swift-crypto.git", "1.0.0"..<"4.0.0"),
 	],
 	targets: [
 		.target(
 			name: "MarkdownBabel",
 			dependencies: [
-				.product(name: "Markdown", package: "swift-markdown")
+				.product(name: "Markdown", package: "swift-markdown"),
+				.product(name: "DynamicJSON", package: "swift-dynamicjson"),
+				.product(name: "Crypto", package: "swift-crypto"),
 			]
 		),
 		.testTarget(

@@ -1,5 +1,6 @@
 import Markdown
 
+// TODO: Make ExecutableContext sendable https://github.com/md-babel/swift-markdown-babel/issues/21
 public struct ExecutableContext {
 	public struct Result {
 		public let range: Markdown.SourceRange

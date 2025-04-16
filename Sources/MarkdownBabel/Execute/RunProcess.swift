@@ -15,13 +15,6 @@ struct POSIXError: Error, Equatable, Sendable, CustomStringConvertible {
 }
 
 struct RunProcess {
-	enum Output {
-		/// Standard output data from the launches process that could not be converted to a UTF-8 String.
-		case data(Data)
-		/// UTF-8 decoded String from the original data (if decoding was successful).
-		case string(String)
-	}
-
 	typealias TerminationStatus = Int32
 	typealias TerminationStatusOrError = Either<TerminationStatus, String>
 
@@ -32,7 +25,7 @@ struct RunProcess {
 	/// - Parameters:
 	///   - result: Either the tool’s termination status or, if something went wrong, an error indicating what that was.
 	///   - output: Data captured from the tool’s `stdout`.
-	typealias CompletionHandler = (_ result: TerminationStatusOrError, _ output: Output) -> Void
+	typealias CompletionHandler = (_ result: TerminationStatusOrError, _ output: Data) -> Void
 
 	/// Runs the specified tool as a child process, supplying `stdin` and capturing `stdout`.
 	///
@@ -89,6 +82,7 @@ struct RunProcess {
 		proc.arguments = arguments
 		proc.standardInput = inputPipe
 		proc.standardOutput = outputPipe
+		// TODO: capture standard error https://github.com/md-babel/swift-markdown-babel/issues/22
 		group.enter()
 		proc.terminationHandler = { _ in
 			// This bounce to the main queue is important; read the comment near the `run()` call to understand why.
@@ -103,19 +97,13 @@ struct RunProcess {
 		// - important: If the process was never launched, requesting its termination status raises an Objective-C exception (ouch!).  So, we only read `terminationStatus` if `errorQ` is `nil`.
 
 		group.notify(queue: .main) {
-			let output: Output =
-				if let string = String(data: outputData, encoding: .utf8) {
-					.string(string)
-				} else {
-					.data(outputData)
-				}
 			let result: TerminationStatusOrError =
 				if let error = errorQ {
 					.right("\(error)")
 				} else {
 					.left(proc.terminationStatus)
 				}
-			completionHandler(result, output)
+			completionHandler(result, outputData)
 		}
 
 		do {
@@ -257,7 +245,7 @@ extension RunProcess {
 	func callAsFunction(
 		input data: Data,
 		additionalArguments: [String] = []
-	) async -> (result: TerminationStatusOrError, output: Output) {
+	) async -> (result: TerminationStatusOrError, output: Data) {
 		dispatchPrecondition(condition: .onQueue(.main))
 		return await withCheckedContinuation { continuation in
 			RunProcess.launch(
@@ -275,7 +263,7 @@ extension RunProcess {
 	func callAsFunction(
 		input string: String,
 		additionalArguments: [String] = []
-	) async throws -> (result: TerminationStatusOrError, output: Output) {
+	) async throws -> (result: TerminationStatusOrError, output: Data) {
 		dispatchPrecondition(condition: .onQueue(.main))
 		return try await withCheckedThrowingContinuation { continuation in
 			do {
