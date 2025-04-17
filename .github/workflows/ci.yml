@@ -16,14 +16,14 @@ env:
 
 jobs:
   test-macos:
-    name: Test on macOS 14
-    runs-on: macOS-14
+    name: Test on macOS 15
+    runs-on: macOS-15
     steps:
       - uses: actions/checkout@v4
       - name: Xcode Select Version
         uses: mobiledevops/xcode-select-version-action@v1
         with:
-          xcode-select-version: 16.1
+          xcode-select-version: 16.3
       - name: Test
         run: set -o pipefail && swift test | xcbeautify --renderer github-actions
   test-ubuntu:
@@ -41,3 +41,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Spell Check Repo
         uses: crate-ci/typos@v1.31.1
+  swift-format:
+    name: swift-format
+    runs-on: macOS-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode Select Version
+        uses: mobiledevops/xcode-select-version-action@v1
+        with:
+          xcode-select-version: 16.3
+      - name: Format and lint
+        run: swift format lint --recursive --parallel --strict .

@@ -89,7 +89,8 @@ struct ExecuteCommand: AsyncParsableCommand {
 		let evaluator = configuration.makeEvaluator(
 			generateImageFileURL: GenerateImageFileURL(
 				outputDirectory: try outputDirectory(),
-				fileExtension: "svg"  // TODO: Make file extension configurable in converter https://github.com/md-babel/swift-markdown-babel/issues/20
+				// TODO: Make file extension configurable in converter https://github.com/md-babel/swift-markdown-babel/issues/20
+				fileExtension: "svg"
 			)
 		)
 		let execute = Execute(executableContext: context, evaluator: evaluator)

@@ -1,3 +1,4 @@
+// swift-format-ignore-file: AlwaysUseLowerCamelCase
 import DynamicJSON
 import MarkdownBabel
 import Testing
