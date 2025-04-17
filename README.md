@@ -2,6 +2,14 @@
 
 A Markdown toolchain to make your documents executable.
 
+## Examples
+
+[See the examples file](Examples.md) to learn how to configure various evaluators to 
+
+- generate graphs, 
+- do HTTP requests, 
+- and run scripts.
+
 ## Demo
 
 We'll 'execute' the code block in [`test.txt`](test.txt) that shells out to `date` (around [line 7](https://github.com/md-babel/swift-markdown-babel/blob/main/test.txt#L6), with 1-based counting), using the [`config.json`](config.json) that instructs `md-babel` how to interpret `sh` code blocks.
