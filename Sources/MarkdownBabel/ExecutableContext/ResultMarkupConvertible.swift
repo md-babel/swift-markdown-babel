@@ -1,18 +1,13 @@
 import Markdown
 
-protocol ResultMarkupConvertible {
-	associatedtype Conversion: ResultMarkup
-	func makeResultMarkup() -> Conversion
+public protocol ResultMarkupConvertible: Markdown.Markup {
+	associatedtype ResultMarkupConversion: ResultMarkup where ResultMarkupConversion.BaseMarkup == Self
 }
 
 extension Markdown.CodeBlock: ResultMarkupConvertible {
-	func makeResultMarkup() -> CodeBlockResult {
-		return CodeBlockResult(markdown: self)
-	}
+	public typealias ResultMarkupConversion = CodeBlockResult
 }
 
 extension Markdown.Image: ResultMarkupConvertible {
-	func makeResultMarkup() -> ImageResult {
-		return ImageResult(markdown: self)
-	}
+	public typealias ResultMarkupConversion = ImageResult
 }

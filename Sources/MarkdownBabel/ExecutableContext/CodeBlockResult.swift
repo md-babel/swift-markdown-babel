@@ -6,11 +6,13 @@ public struct CodeBlockResult: ResultMarkup {
 	public let language: String
 	public let code: String
 	public var content: String { code }
+	public let range: SourceRange
 
-	public init(markdown codeBlock: Markdown.CodeBlock) {
-		self.language = codeBlock.language ?? ""
-		self.code = codeBlock.code
-		self._debugDescription = { codeBlock.debugDescription(options: $0) }
+	public init(_ base: DocumentEmbedded<CodeBlock>) {
+		self.language = base.markup.language ?? ""
+		self.code = base.markup.code
+		self._debugDescription = { base.markup.debugDescription(options: $0) }
+		self.range = base.range
 	}
 
 	public func debugDescription(options: MarkupDumpOptions = []) -> String {

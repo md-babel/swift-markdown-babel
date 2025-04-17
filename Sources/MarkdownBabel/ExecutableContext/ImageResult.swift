@@ -6,11 +6,13 @@ public struct ImageResult: ResultMarkup {
 	public let title: String
 	public let source: String
 	public var content: String { source }
+	public let range: SourceRange
 
-	public init(markdown image: Markdown.Image) {
-		self.title = image.title ?? ""
-		self.source = image.source ?? ""
-		self._debugDescription = { image.debugDescription(options: $0) }
+	public init(_ base: DocumentEmbedded<Markdown.Image>) {
+		self.title = base.markup.title ?? ""
+		self.source = base.markup.source ?? ""
+		self._debugDescription = { base.markup.debugDescription(options: $0) }
+		self.range = base.range
 	}
 
 	public func debugDescription(options: MarkupDumpOptions = []) -> String {
