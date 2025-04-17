@@ -1,4 +1,4 @@
-// swift-format-ignore-file
+// swift-format-ignore-file: AlwaysUseLowerCamelCase
 import Markdown
 import MarkdownBabel
 import Testing
