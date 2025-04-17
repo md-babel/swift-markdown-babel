@@ -1,14 +1,27 @@
 # Markdown Babel
 
-A Markdown toolchain to make your documents executable.
+A Markdown toolchain for literate programming and to make your documents executable.
+
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+  - [Examples](#examples)
+  - [Demo](#demo)
+  - [Usage](#usage)
+    - [Execute Block](#execute-block)
+    - [Configuration](#configuration)
+      - [Configuration File](#configuration-file)
+    - [Select Executable Context](#select-executable-context)
+
+<!-- markdown-toc end -->
 
 ## Examples
 
 [See the examples file](Examples.md) to learn how to configure various evaluators to 
 
-- generate graphs, 
-- do HTTP requests, 
-- and run scripts.
+- 🖼 generate graphs, 
+- 🌍 do HTTP requests, 
+- 🤖 and run scripts.
 
 ## Demo
 
@@ -131,3 +144,8 @@ Client editors can process this to inspect `md-babel` components.
 
 [select-block-schema]: https://github.com/md-babel/md-babel-schema/tree/main/select-block
 
+<!-- 
+Local Variables:
+markdown-toc-user-toc-structure-manipulation-fn: cdr
+End:
+-->
