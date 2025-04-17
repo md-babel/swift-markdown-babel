@@ -3,6 +3,7 @@
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
+- [Emacs Lisp evaluation ](#emacs-lisp-evaluation)
 - [Mermaid graph rendering](#mermaid-graph-rendering)
 - [PlantUML graph rendering ](#plantuml-graph-rendering)
 - [REST API Testing via `hurl`](#rest-api-testing-via-hurl)
