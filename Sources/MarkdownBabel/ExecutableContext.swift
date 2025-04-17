@@ -5,9 +5,15 @@ public struct ExecutableContext {
 	public struct Result {
 		public let range: Markdown.SourceRange
 		public let header: String
-		let contentMarkup: Markdown.CodeBlock
+		private let contentMarkup: Markdown.CodeBlock
 		public var language: String { contentMarkup.language ?? "" }
 		public var content: String { contentMarkup.code }
+
+		internal init(range: SourceRange, header: String, contentMarkup: CodeBlock) {
+			self.range = range
+			self.header = header
+			self.contentMarkup = contentMarkup
+		}
 	}
 
 	public struct Error {

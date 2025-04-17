@@ -3,22 +3,26 @@ import Markdown
 extension MarkdownDocument {
 	public func executableContext(at sourceLocation: Markdown.SourceLocation) -> ExecutableContext? {
 		guard let codeBlockAtLocation = markup(at: sourceLocation) as? Markdown.CodeBlock else { return nil }
-		let result = { () -> ExecutableContext.Result? in
-			guard let htmlBlock = codeBlockAtLocation.nextSibling() as? Markdown.HTMLBlock,
-				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
-				let commentBlockRange = commentBlock.range,
-				commentBlock.commentedText.hasPrefix("Result:"),
-				let resultCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
-				let resultCodeBlockRange = resultCodeBlock.range
-			else { return nil }
-			return ExecutableContext.Result(
-				range: commentBlockRange.lowerBound..<resultCodeBlockRange.upperBound,
-				header: commentBlock.commentedText,
-				contentMarkup: resultCodeBlock
-			)
-		}()
+		let (result, matchedResultMarkup) =
+			{ () -> (ExecutableContext.Result, any Markdown.BlockMarkup)? in
+				guard let htmlBlock = codeBlockAtLocation.nextSibling() as? Markdown.HTMLBlock,
+					let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
+					let commentBlockRange = commentBlock.range,
+					commentBlock.commentedText.hasPrefix("Result:"),
+					let resultCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
+					let resultCodeBlockRange = resultCodeBlock.range
+				else { return nil }
+				return (
+					ExecutableContext.Result(
+						range: commentBlockRange.lowerBound..<resultCodeBlockRange.upperBound,
+						header: commentBlock.commentedText,
+						contentMarkup: resultCodeBlock
+					),
+					resultCodeBlock
+				)
+			}() ?? (nil, nil)
 		let error = { () -> ExecutableContext.Error? in
-			let referenceBlock = result?.contentMarkup ?? codeBlockAtLocation
+			let referenceBlock = matchedResultMarkup ?? codeBlockAtLocation
 			guard let htmlBlock = referenceBlock.nextSibling() as? Markdown.HTMLBlock,
 				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
 				let commentBlockRange = commentBlock.range,
