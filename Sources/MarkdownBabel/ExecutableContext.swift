@@ -5,7 +5,8 @@ public struct ExecutableContext {
 	public struct Result {
 		public let range: Markdown.SourceRange
 		public let header: String
-		public let contentMarkup: Markdown.CodeBlock
+		let contentMarkup: Markdown.CodeBlock
+		public var language: String { contentMarkup.language ?? "" }
 		public var content: String { contentMarkup.code }
 	}
 

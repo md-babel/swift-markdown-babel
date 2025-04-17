@@ -31,7 +31,7 @@ func json(_ jsonResult: ExecutableContext.Result) -> JSON {
 		"range": json(jsonResult.range),
 		"header": .string(jsonResult.header),
 		"type": .string("code_block"),
-		"language": .string(jsonResult.contentMarkup.language ?? ""),
+		"language": .string(jsonResult.language),
 		"content": .string(jsonResult.content),
 	]
 }
