@@ -23,9 +23,9 @@ extension Execute.Response.ExecutionResult.Output {
 extension Execute.Response.ExecutionResult {
 	fileprivate func renderedOutputBlocks(reusing oldResult: ExecutableContext.Result?) -> String? {
 		guard let output else { return nil }
-		let header: String = oldResult?.header ?? "Result:"
+		let header: String = oldResult?.header ?? ResultMetadataBlock.headerPrefix
 		return [
-			HTMLCommentBlock(htmlBlock: HTMLBlock("<!--\(header)-->"))!.format(),
+			HTMLCommentBlock(string: header).format(),
 			output.rendered(),
 		].joined(separator: "\n")
 	}
@@ -34,7 +34,7 @@ extension Execute.Response.ExecutionResult {
 		guard let message = self.error else { return nil }
 		let header: String = oldError?.header ?? "Error:"
 		return [
-			HTMLCommentBlock(htmlBlock: HTMLBlock("<!--\(header)-->"))!.format(),
+			HTMLCommentBlock(string: header).format(),
 			CodeBlock(language: nil, message.trimmingCharacters(in: .newlines)).format(
 				options: .init(useCodeFence: .always)
 			),

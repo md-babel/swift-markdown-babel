@@ -13,6 +13,13 @@ public struct HTMLCommentBlock: Markdown.BlockMarkup {
 
 	public let commentedText: String
 
+	public init(string: String) {
+		let htmlBlock = Markdown.HTMLBlock("\(Self.opener)\(string)\(Self.closer)")
+		guard let instance = Self(htmlBlock: htmlBlock)
+		else { preconditionFailure("Programmer error; HTMLCommentBlock with <!--...--> should produce valid instance") }
+		self = instance
+	}
+
 	public init?(htmlBlock: Markdown.HTMLBlock) {
 		let trimmedContent = htmlBlock.rawHTML.trimmingCharacters(in: .whitespacesAndNewlines)
 		guard trimmedContent.hasPrefix(HTMLCommentBlock.opener),
