@@ -25,7 +25,7 @@ extension Execute.Response.ExecutionResult {
 		guard let output else { return nil }
 		let commentBlock = oldResult?.metadata.commentBlock.markup ?? ResultMetadataBlock.makeHTMLCommentBlock()
 		return [
-			commentBlock.format(),
+			commentBlock.format().trimmingCharacters(in: .whitespacesAndNewlines),
 			output.rendered(),
 		].joined(separator: "\n")
 	}
