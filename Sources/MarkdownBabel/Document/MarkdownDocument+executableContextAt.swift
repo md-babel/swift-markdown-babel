@@ -5,20 +5,15 @@ extension MarkdownDocument {
 		guard let codeBlockAtLocation = markup(at: sourceLocation) as? Markdown.CodeBlock else { return nil }
 		let (result, matchedResultMarkup) =
 			{ () -> (ExecutableContext.Result, any Markdown.BlockMarkup)? in
-				guard let htmlBlock = codeBlockAtLocation.nextSibling() as? Markdown.HTMLBlock,
-					let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
-					let commentBlockRange = commentBlock.range,
-					commentBlock.commentedText.hasPrefix("Result:"),
-					let resultCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
-					let resultCodeBlockRange = resultCodeBlock.range
+				guard let metadataBlock = ResultMetadataBlock(from: codeBlockAtLocation.nextSibling()),
+					let (resultBlock, embedded) = metadataBlock.result(ofType: CodeBlockResult.self)
 				else { return nil }
 				return (
 					ExecutableContext.Result(
-						range: commentBlockRange.lowerBound..<resultCodeBlockRange.upperBound,
-						header: commentBlock.commentedText,
-						contentMarkup: resultCodeBlock
+						metadata: metadataBlock,
+						content: resultBlock
 					),
-					resultCodeBlock
+					embedded.markup
 				)
 			}() ?? (nil, nil)
 		let error = { () -> ExecutableContext.Error? in

@@ -9,11 +9,12 @@ public struct ResultMetadataBlock {
 	public var range: SourceRange { commentBlock.range }
 
 	/// Associated result block that follows immediately on the metadata block.
-	func result<R>() -> R? where R: ResultMarkup {
+	func result<R>(ofType: R.Type) -> (result: R, embedded: DocumentEmbedded<R.BaseMarkup>)?
+	where R: ResultMarkup {
 		guard let nextSibling = commentBlock.markup.nextSibling() as? R.BaseMarkup,
 			let nextEmbedded = nextSibling.embedded()
 		else { return nil }
-		return nextEmbedded.makeResultMarkup()
+		return (nextEmbedded.makeResultMarkup(), nextEmbedded)
 	}
 }
 
@@ -25,5 +26,17 @@ extension ResultMetadataBlock {
 			embedded.markup.commentedText.hasPrefix(Self.headerPrefix)
 		else { return nil }
 		self.init(commentBlock: embedded)
+	}
+
+	@_disfavoredOverload
+	init?(from markup: Markdown.Markup?) {
+		guard let markup else { return nil }
+		self.init(from: markup)
+	}
+}
+
+extension ResultMetadataBlock {
+	static func makeHTMLCommentBlock() -> HTMLCommentBlock {
+		return HTMLCommentBlock(string: headerPrefix)
 	}
 }

@@ -3,16 +3,11 @@ import Markdown
 // TODO: Make ExecutableContext sendable https://github.com/md-babel/swift-markdown-babel/issues/21
 public struct ExecutableContext {
 	public struct Result {
-		public let range: Markdown.SourceRange
-		public let header: String
-		private let contentMarkup: Markdown.CodeBlock
-		public var language: String { contentMarkup.language ?? "" }
-		public var content: String { contentMarkup.code }
+		public let metadata: ResultMetadataBlock
+		public let content: any ResultMarkup
 
-		internal init(range: SourceRange, header: String, contentMarkup: CodeBlock) {
-			self.range = range
-			self.header = header
-			self.contentMarkup = contentMarkup
+		public var encompassingRange: Markdown.SourceRange {
+			return metadata.range.lowerBound..<content.range.upperBound
 		}
 	}
 
@@ -31,7 +26,7 @@ public struct ExecutableContext {
 		let codeBlockRange = codeBlock.range!
 		let lowerBound = codeBlockRange.lowerBound
 		let upperBound = max(
-			(result?.range.upperBound ?? codeBlockRange.upperBound),
+			(result?.encompassingRange.upperBound ?? codeBlockRange.upperBound),
 			(error?.range.upperBound ?? codeBlockRange.upperBound),
 			codeBlockRange.upperBound
 		)
@@ -83,12 +78,12 @@ extension ExecutableContext.Result: CustomDebugStringConvertible {
 		}
 
 		return """
-			» Range: \(range)
-			» Header: “\(header)”
+			» Range: \(encompassingRange)
+			» Header: “\(metadata.header)”
 			» Content:
-			\(indent(content))
+			\(indent(content.content))
 			» Content markup:
-			\(indent(contentMarkup.debugDescription(options: options)))
+			\(indent(content.debugDescription(options: options)))
 			"""
 	}
 }

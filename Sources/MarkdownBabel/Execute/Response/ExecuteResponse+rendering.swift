@@ -23,9 +23,9 @@ extension Execute.Response.ExecutionResult.Output {
 extension Execute.Response.ExecutionResult {
 	fileprivate func renderedOutputBlocks(reusing oldResult: ExecutableContext.Result?) -> String? {
 		guard let output else { return nil }
-		let header: String = oldResult?.header ?? ResultMetadataBlock.headerPrefix
+		let commentBlock = oldResult?.metadata.commentBlock.markup ?? ResultMetadataBlock.makeHTMLCommentBlock()
 		return [
-			HTMLCommentBlock(string: header).format(),
+			commentBlock.format(),
 			output.rendered(),
 		].joined(separator: "\n")
 	}

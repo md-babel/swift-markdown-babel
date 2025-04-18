@@ -26,14 +26,27 @@ func json(_ error: ExecutableContext.Error) -> JSON {
 	]
 }
 
-func json(_ jsonResult: ExecutableContext.Result) -> JSON {
+func json(_ codeBlock: CodeBlockResult) -> JSON {
 	return [
-		"range": json(jsonResult.range),
-		"header": .string(jsonResult.header),
 		"type": .string("code_block"),
-		"language": .string(jsonResult.language),
-		"content": .string(jsonResult.content),
+		"language": .string(codeBlock.language),
+		"content": .string(codeBlock.code),
 	]
+}
+
+func json(_ anyResultMarkup: any ResultMarkup) -> JSON {
+	return switch anyResultMarkup {
+	case let codeBlock as CodeBlockResult: json(codeBlock)
+	default: fatalError("Unhandled result markup type \(type(of: anyResultMarkup))")
+	}
+}
+
+func json(_ jsonResult: ExecutableContext.Result) -> JSON {
+	let result: JSON = [
+		"range": json(jsonResult.encompassingRange),
+		"header": .string(jsonResult.metadata.header),
+	]
+	return result.merging(patch: json(jsonResult.content))
 }
 
 func json(_ markup: CodeBlock) -> JSON {
