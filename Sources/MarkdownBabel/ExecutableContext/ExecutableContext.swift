@@ -12,10 +12,12 @@ public struct ExecutableContext {
 	}
 
 	public struct Error {
-		public let range: Markdown.SourceRange
-		public let header: String
-		public let contentMarkup: Markdown.CodeBlock
-		public var content: String { contentMarkup.code }
+		public let metadata: ErrorMetadataBlock
+		public let content: CodeBlockResult
+
+		public var encompassingRange: Markdown.SourceRange {
+			return metadata.range.lowerBound..<content.range.upperBound
+		}
 	}
 
 	public let codeBlock: Markdown.CodeBlock
@@ -27,7 +29,7 @@ public struct ExecutableContext {
 		let lowerBound = codeBlockRange.lowerBound
 		let upperBound = max(
 			(result?.encompassingRange.upperBound ?? codeBlockRange.upperBound),
-			(error?.range.upperBound ?? codeBlockRange.upperBound),
+			(error?.encompassingRange.upperBound ?? codeBlockRange.upperBound),
 			codeBlockRange.upperBound
 		)
 		return lowerBound..<upperBound
@@ -104,12 +106,12 @@ extension ExecutableContext.Error: CustomDebugStringConvertible {
 		}
 
 		return """
-			» Range: \(range)
-			» Header: “\(header)”
+			» Range: \(encompassingRange)
+			» Header: “\(metadata.header)”
 			» Content:
-			\(indent(content))
+			\(indent(content.content))
 			» Content markup:
-			\(indent(contentMarkup.debugDescription(options: options)))
+			\(indent(content.debugDescription(options: options)))
 			"""
 	}
 }

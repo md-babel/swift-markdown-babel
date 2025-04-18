@@ -17,18 +17,16 @@ extension MarkdownDocument {
 		}()
 
 		let error = { () -> ExecutableContext.Error? in
-			let referenceBlock = result?.content.nextSibling() ?? codeBlockAtLocation.nextSibling()
-			guard let htmlBlock = referenceBlock as? Markdown.HTMLBlock,
-				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
-				let commentBlockRange = commentBlock.range,
-				commentBlock.commentedText.hasPrefix("Error:"),
-				let errorCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
-				let errorCodeBlockRange = errorCodeBlock.range
+			let markupBlock = result?.content.nextSibling() ?? codeBlockAtLocation.nextSibling()
+			guard let metadataBlock = ErrorMetadataBlock(from: markupBlock)
 			else { return nil }
+
+			guard let errorBlock = metadataBlock.result(ofType: CodeBlockResult.self)
+			else { return nil }
+
 			return ExecutableContext.Error(
-				range: commentBlockRange.lowerBound..<errorCodeBlockRange.upperBound,
-				header: commentBlock.commentedText,
-				contentMarkup: errorCodeBlock
+				metadata: metadataBlock,
+				content: errorBlock
 			)
 		}()
 

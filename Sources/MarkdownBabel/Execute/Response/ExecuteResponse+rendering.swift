@@ -32,9 +32,9 @@ extension Execute.Response.ExecutionResult {
 
 	fileprivate func renderedErrorBlocks(reusing oldError: ExecutableContext.Error?) -> String? {
 		guard let message = self.error else { return nil }
-		let header: String = oldError?.header ?? "Error:"
+		let commentBlock = oldError?.metadata.commentBlock.markup ?? ErrorMetadataBlock.makeHTMLCommentBlock()
 		return [
-			HTMLCommentBlock(string: header).format(),
+			commentBlock.format().trimmingCharacters(in: .whitespacesAndNewlines),
 			CodeBlock(language: nil, message.trimmingCharacters(in: .newlines)).format(
 				options: .init(useCodeFence: .always)
 			),

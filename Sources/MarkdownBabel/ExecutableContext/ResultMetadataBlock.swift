@@ -1,8 +1,24 @@
 import Markdown
 
-/// Represents the comment-based header or metadata parts of a result or error block.
-public struct ResultMetadataBlock {
+public protocol MetadataBlockType {
+	static var headerPrefix: String { get }
+}
+
+public enum ResultBlock: MetadataBlockType {
 	public static let headerPrefix = "Result:"
+}
+
+public enum ErrorBlock: MetadataBlockType {
+	public static let headerPrefix = "Error:"
+}
+
+public typealias ResultMetadataBlock = MetadataBlock<ResultBlock>
+public typealias ErrorMetadataBlock = MetadataBlock<ErrorBlock>
+
+/// Represents the comment-based header or metadata parts of a result or error block.
+public struct MetadataBlock<T>
+where T: MetadataBlockType {
+	public static var headerPrefix: String { T.headerPrefix }
 
 	let commentBlock: DocumentEmbedded<HTMLCommentBlock>
 	public var header: String { commentBlock.markup.commentedText }
@@ -18,7 +34,7 @@ public struct ResultMetadataBlock {
 	}
 }
 
-extension ResultMetadataBlock {
+extension MetadataBlock {
 	init?(from markup: Markdown.Markup) {
 		guard let htmlBlock = markup as? Markdown.HTMLBlock,
 			let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
@@ -35,7 +51,7 @@ extension ResultMetadataBlock {
 	}
 }
 
-extension ResultMetadataBlock {
+extension MetadataBlock {
 	static func makeHTMLCommentBlock() -> HTMLCommentBlock {
 		return HTMLCommentBlock(string: headerPrefix)
 	}

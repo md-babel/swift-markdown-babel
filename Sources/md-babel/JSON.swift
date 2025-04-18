@@ -17,13 +17,12 @@ func json(_ range: SourceRange) -> JSON {
 }
 
 func json(_ error: ExecutableContext.Error) -> JSON {
-	return [
-		"range": json(error.range),
-		"header": .string(error.header),
-		"type": .string("code_block"),
-		"language": .string(error.contentMarkup.language ?? ""),
-		"content": .string(error.content),
-	]
+	return
+		JSON
+		.object([
+			"range": json(error.encompassingRange),
+			"header": .string(error.metadata.header),
+		]).merging(patch: json(error.content))
 }
 
 func json(_ codeBlock: CodeBlockResult) -> JSON {
@@ -41,12 +40,13 @@ func json(_ anyResultMarkup: any ResultMarkup) -> JSON {
 	}
 }
 
-func json(_ jsonResult: ExecutableContext.Result) -> JSON {
-	let result: JSON = [
-		"range": json(jsonResult.encompassingRange),
-		"header": .string(jsonResult.metadata.header),
-	]
-	return result.merging(patch: json(jsonResult.content))
+func json(_ result: ExecutableContext.Result) -> JSON {
+	return
+		JSON
+		.object([
+			"range": json(result.encompassingRange),
+			"header": .string(result.metadata.header),
+		]).merging(patch: json(result.content))
 }
 
 func json(_ markup: CodeBlock) -> JSON {
