@@ -3,22 +3,22 @@ import Markdown
 extension MarkdownDocument {
 	public func executableContext(at sourceLocation: Markdown.SourceLocation) -> ExecutableContext? {
 		guard let codeBlockAtLocation = markup(at: sourceLocation) as? Markdown.CodeBlock else { return nil }
-		let (result, matchedResultMarkup) =
-			{ () -> (ExecutableContext.Result, any Markdown.BlockMarkup)? in
-				guard let metadataBlock = ResultMetadataBlock(from: codeBlockAtLocation.nextSibling()),
-					let (resultBlock, embedded) = metadataBlock.result(ofType: CodeBlockResult.self)
-				else { return nil }
-				return (
-					ExecutableContext.Result(
-						metadata: metadataBlock,
-						content: resultBlock
-					),
-					embedded.markup
-				)
-			}() ?? (nil, nil)
+		let result = { () -> ExecutableContext.Result? in
+			guard let metadataBlock = ResultMetadataBlock(from: codeBlockAtLocation.nextSibling())
+			else { return nil }
+
+			guard let resultBlock = metadataBlock.result(ofType: CodeBlockResult.self)
+			else { return nil }
+
+			return ExecutableContext.Result(
+				metadata: metadataBlock,
+				content: resultBlock
+			)
+		}()
+
 		let error = { () -> ExecutableContext.Error? in
-			let referenceBlock = matchedResultMarkup ?? codeBlockAtLocation
-			guard let htmlBlock = referenceBlock.nextSibling() as? Markdown.HTMLBlock,
+			let referenceBlock = result?.content.nextSibling() ?? codeBlockAtLocation.nextSibling()
+			guard let htmlBlock = referenceBlock as? Markdown.HTMLBlock,
 				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
 				let commentBlockRange = commentBlock.range,
 				commentBlock.commentedText.hasPrefix("Error:"),

@@ -9,12 +9,12 @@ public struct ResultMetadataBlock {
 	public var range: SourceRange { commentBlock.range }
 
 	/// Associated result block that follows immediately on the metadata block.
-	func result<R>(ofType: R.Type) -> (result: R, embedded: DocumentEmbedded<R.BaseMarkup>)?
+	func result<R>(ofType: R.Type) -> R?
 	where R: ResultMarkup {
 		guard let nextSibling = commentBlock.markup.nextSibling() as? R.BaseMarkup,
 			let nextEmbedded = nextSibling.embedded()
 		else { return nil }
-		return (nextEmbedded.makeResultMarkup(), nextEmbedded)
+		return nextEmbedded.makeResultMarkup()
 	}
 }
 

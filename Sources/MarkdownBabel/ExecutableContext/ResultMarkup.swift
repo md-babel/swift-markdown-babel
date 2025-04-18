@@ -8,5 +8,7 @@ public protocol ResultMarkup {
 
 	init(_ base: DocumentEmbedded<BaseMarkup>)
 
+	func nextSibling() -> (any Markdown.Markup)?
+
 	func debugDescription(options: MarkupDumpOptions) -> String
 }

@@ -12,6 +12,12 @@ public struct DocumentEmbedded<M> where M: Markdown.Markup {
 	}
 }
 
+extension DocumentEmbedded {
+	public func nextSibling() -> (any Markdown.Markup)? {
+		return markup.nextSibling()
+	}
+}
+
 extension Markdown.Markup {
 	func embedded() -> DocumentEmbedded<Self>? {
 		return DocumentEmbedded(self)
