@@ -2,34 +2,35 @@ import Markdown
 
 extension MarkdownDocument {
 	public func executableContext(at sourceLocation: Markdown.SourceLocation) -> ExecutableContext? {
-		guard let codeBlockAtLocation = markup(at: sourceLocation) as? Markdown.CodeBlock else { return nil }
+		guard let codeBlockAtLocation = markup(at: sourceLocation) as? Markdown.CodeBlock
+		else { return nil }
+
 		let result = { () -> ExecutableContext.Result? in
-			guard let htmlBlock = codeBlockAtLocation.nextSibling() as? Markdown.HTMLBlock,
-				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
-				let commentBlockRange = commentBlock.range,
-				commentBlock.commentedText.hasPrefix("Result:"),
-				let resultCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
-				let resultCodeBlockRange = resultCodeBlock.range
+			guard let metadataBlock = ResultMetadataBlock(from: codeBlockAtLocation.nextSibling())
 			else { return nil }
+
+			let resultBlock: (any ResultMarkup)? =
+				metadataBlock.result(ofType: CodeBlockResult.self)
+				?? metadataBlock.result(ofType: ImageResult.self)
+			guard let resultBlock else { return nil }
+
 			return ExecutableContext.Result(
-				range: commentBlockRange.lowerBound..<resultCodeBlockRange.upperBound,
-				header: commentBlock.commentedText,
-				contentMarkup: resultCodeBlock
+				metadata: metadataBlock,
+				content: resultBlock
 			)
 		}()
+
 		let error = { () -> ExecutableContext.Error? in
-			let referenceBlock = result?.contentMarkup ?? codeBlockAtLocation
-			guard let htmlBlock = referenceBlock.nextSibling() as? Markdown.HTMLBlock,
-				let commentBlock = HTMLCommentBlock(htmlBlock: htmlBlock),
-				let commentBlockRange = commentBlock.range,
-				commentBlock.commentedText.hasPrefix("Error:"),
-				let errorCodeBlock = commentBlock.nextSibling() as? Markdown.CodeBlock,
-				let errorCodeBlockRange = errorCodeBlock.range
+			let markupBlock = result?.content.nextSibling() ?? codeBlockAtLocation.nextSibling()
+			guard let metadataBlock = ErrorMetadataBlock(from: markupBlock)
 			else { return nil }
+
+			guard let errorBlock = metadataBlock.result(ofType: CodeBlockResult.self)
+			else { return nil }
+
 			return ExecutableContext.Error(
-				range: commentBlockRange.lowerBound..<errorCodeBlockRange.upperBound,
-				header: commentBlock.commentedText,
-				contentMarkup: errorCodeBlock
+				metadata: metadataBlock,
+				content: errorBlock
 			)
 		}()
 
