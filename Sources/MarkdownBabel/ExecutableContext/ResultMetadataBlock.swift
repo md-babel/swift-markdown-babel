@@ -15,7 +15,7 @@ public enum ErrorBlock: MetadataBlockType {
 public typealias ResultMetadataBlock = MetadataBlock<ResultBlock>
 public typealias ErrorMetadataBlock = MetadataBlock<ErrorBlock>
 
-/// Represents the comment-based header or metadata parts of a result or error block.
+/// The HTML comment-based header (or metadata parts) of a result or error block.
 public struct MetadataBlock<T>
 where T: MetadataBlockType {
 	public static var headerPrefix: String { T.headerPrefix }
@@ -27,10 +27,18 @@ where T: MetadataBlockType {
 	/// Associated result block that follows immediately on the metadata block.
 	func result<R>(ofType: R.Type) -> R?
 	where R: ResultMarkup {
-		guard let nextSibling = commentBlock.markup.nextSibling() as? R.BaseMarkup,
+		guard let nextSibling = commentBlock.nextSibling(parsing: R.BaseMarkup.parsing(_:)),
 			let nextEmbedded = nextSibling.embedded()
 		else { return nil }
 		return nextEmbedded.makeResultMarkup()
+	}
+}
+
+extension DocumentEmbedded {
+	func nextSibling<T>(parsing: (any Markdown.Markup) -> T?) -> T?
+	where T: Markdown.Markup {
+		guard let next = self.nextSibling() else { return nil }
+		return parsing(next)
 	}
 }
 

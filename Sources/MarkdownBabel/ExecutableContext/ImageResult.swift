@@ -9,9 +9,9 @@ public struct ImageResult: ResultMarkup {
 	public var content: String { source }
 	public let range: SourceRange
 
-	public init(_ base: DocumentEmbedded<Markdown.Image>) {
-		self.title = base.markup.title ?? ""
-		self.source = base.markup.source ?? ""
+	public init(_ base: DocumentEmbedded<ImageParagraph>) {
+		self.title = base.markup.image.title ?? ""
+		self.source = base.markup.image.source ?? ""
 		self._debugDescription = { base.markup.debugDescription(options: $0) }
 		self._nextSibling = { base.markup.nextSibling() }
 		self.range = base.range

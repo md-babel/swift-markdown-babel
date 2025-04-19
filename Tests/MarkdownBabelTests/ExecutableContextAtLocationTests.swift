@@ -111,7 +111,7 @@ func range(
 		}
 	}
 
-	@Suite("in code block with result first") struct CodeBlockWithResultFirst {
+	@Suite("in code block with code result first") struct CodeBlockWithCodeResultFirst {
 		static let resultBlock = """
 			<!--Result:-->
 			```
@@ -119,7 +119,7 @@ func range(
 			```
 			"""
 
-		@Test func returnsCodeBlockWithResult() throws {
+		@Test func returnsCodeBlockWithCodeBlockResult() throws {
 			let document = makeDocument(followCodeWithBlock: Self.resultBlock)
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
@@ -143,9 +143,9 @@ func range(
 		}
 
 		@Suite("followed by unsupported block") struct ThenUnsupportedBlock {
-			@Test func returnsCodeBlockWithResult() throws {
+			@Test func returnsCodeBlockWithCodeBlockResult() throws {
 				let document = makeDocument(
-					followCodeWithBlock: CodeBlockWithResultFirst.resultBlock,
+					followCodeWithBlock: CodeBlockWithCodeResultFirst.resultBlock,
 					andThen: """
 						<!--Unsupported:-->
 						```
@@ -191,7 +191,7 @@ func range(
 					"""
 			)
 
-			@Test func returnsCodeBlockWithResult() throws {
+			@Test func returnsCodeBlockWithFirstCodeBlockResult() throws {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
 					Code:
@@ -230,7 +230,7 @@ func range(
 					"""
 			)
 
-			@Test func returnsCodeBlockWithResultAndError() throws {
+			@Test func returnsCodeBlockWithCodeBlockResultAndError() throws {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
 					Code:
@@ -255,6 +255,156 @@ func range(
 					"""
 				let result = try #require(document.executableContext(at: location))
 				#expect(result.encompassingRange == range(from: 3, 1, to: 15, 4))
+				#expect(result.dump() == expectedDump)
+			}
+		}
+	}
+
+	@Suite("in code block with image result first") struct CodeBlockWithImageResultFirst {
+		static let resultBlock = """
+			<!--Result:-->
+			![84f7328ea86a0e84cb749edcec984c8d55938d653b3b2851507b08be97fda0ea](/path/to/file.png)
+			"""
+
+		@Test("returns code block with image paragraph result") func returnsCodeBlockWithImageParagraphResult() throws {
+			let document = makeDocument(followCodeWithBlock: Self.resultBlock)
+			print(document.debugDescription())
+			let location = SourceLocation(line: 4, column: 1, source: nil)
+			let expectedDump = """
+				Code:
+				├─ CodeBlock @3:1-5:4 language: sh
+				│  date
+				Result:
+				» Range: 7:1..<8:87
+				» Header: “Result:”
+				» Content:
+				  /path/to/file.png
+				» Content markup:
+				  ├─ Paragraph @8:1-8:87
+				  │  └─ Image @8:1-8:87 source: "/path/to/file.png"
+				  │     └─ Text @8:3-8:67 "84f7328ea86a0e84cb749edcec984c8d55938d653b3b2851507b08be97fda0ea"
+				Error:
+				(No Error)
+				"""
+			let result = try #require(document.executableContext(at: location))
+			#expect(result.encompassingRange == range(from: 3, 1, to: 8, 87))
+			#expect(result.dump() == expectedDump)
+		}
+
+		@Suite("followed by unsupported block") struct ThenUnsupportedBlock {
+			@Test("returns code block with image paragraph result, ignoring unsupported block")
+			func returnsCodeBlockWithImageParagraphResult() throws {
+				let document = makeDocument(
+					followCodeWithBlock: CodeBlockWithImageResultFirst.resultBlock,
+					andThen: """
+						<!--Unsupported:-->
+						```
+						Should not match
+						```
+						"""
+				)
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					» Range: 7:1..<8:87
+					» Header: “Result:”
+					» Content:
+					  /path/to/file.png
+					» Content markup:
+					  ├─ Paragraph @8:1-8:87
+					  │  └─ Image @8:1-8:87 source: "/path/to/file.png"
+					  │     └─ Text @8:3-8:67 "84f7328ea86a0e84cb749edcec984c8d55938d653b3b2851507b08be97fda0ea"
+					Error:
+					(No Error)
+					"""
+				let result = try #require(document.executableContext(at: location))
+				#expect(result.encompassingRange == range(from: 3, 1, to: 8, 87))
+				#expect(result.dump() == expectedDump)
+			}
+		}
+
+		@Suite("followed by another result") struct ThenAnotherResult {
+			let document = makeDocument(
+				followCodeWithBlock: """
+					<!--Result:-->
+					![84f7328ea86a0e84cb749edcec984c8d55938d653b3b2851507b08be97fda0ea](/path/to/file.png)
+					""",
+				andThen: """
+					<!--Result:-->
+					![next result should be ignored](/other/file.jpeg)
+					"""
+			)
+
+			@Test("returns code block with first image paragraph result")
+			func returnsCodeBlockWithFirstImageParagraphResult()
+				throws
+			{
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					» Range: 7:1..<8:87
+					» Header: “Result:”
+					» Content:
+					  /path/to/file.png
+					» Content markup:
+					  ├─ Paragraph @8:1-8:87
+					  │  └─ Image @8:1-8:87 source: "/path/to/file.png"
+					  │     └─ Text @8:3-8:67 "84f7328ea86a0e84cb749edcec984c8d55938d653b3b2851507b08be97fda0ea"
+					Error:
+					(No Error)
+					"""
+				let result = try #require(document.executableContext(at: location))
+				#expect(result.encompassingRange == range(from: 3, 1, to: 8, 87))
+				#expect(result.dump() == expectedDump)
+			}
+		}
+
+		@Suite("followed by error") struct ThenError {
+			let document = makeDocument(
+				followCodeWithBlock: """
+					<!--Result:-->
+					![84f7328ea86a0e84cb749edcec984c8d55938d653b3b2851507b08be97fda0ea](/path/to/file.png)
+					""",
+				andThen: """
+					<!--Error:-->
+					```
+					Image has ugly colors.
+					```
+					"""
+			)
+
+			@Test func returnsCodeBlockWithImageParagraphResultAndError() throws {
+				let location = SourceLocation(line: 4, column: 1, source: nil)
+				let expectedDump = """
+					Code:
+					├─ CodeBlock @3:1-5:4 language: sh
+					│  date
+					Result:
+					» Range: 7:1..<8:87
+					» Header: “Result:”
+					» Content:
+					  /path/to/file.png
+					» Content markup:
+					  ├─ Paragraph @8:1-8:87
+					  │  └─ Image @8:1-8:87 source: "/path/to/file.png"
+					  │     └─ Text @8:3-8:67 "84f7328ea86a0e84cb749edcec984c8d55938d653b3b2851507b08be97fda0ea"
+					Error:
+					» Range: 10:1..<13:4
+					» Header: “Error:”
+					» Content:
+					  Image has ugly colors.
+					» Content markup:
+					  ├─ CodeBlock @11:1-13:4 language: none
+					  │  Image has ugly colors.
+					"""
+				let result = try #require(document.executableContext(at: location))
+				#expect(result.encompassingRange == range(from: 3, 1, to: 13, 4))
 				#expect(result.dump() == expectedDump)
 			}
 		}
