@@ -10,10 +10,10 @@ $(linux_files) &:
 	tar --create --bzip2 --file release/md-babel_linux-arm64-$(version).tar.bz2 --directory release/linux_arm64 md-babel
 
 .build/$(version)/arm64-apple-macosx/release/md-babel:
-	swift build --scratch-path .build/$(version) --configuration release --triple arm64-apple-macosx
+	swift build --quiet --scratch-path .build/$(version) --configuration release --triple arm64-apple-macosx
 
 .build/$(version)/x86_64-apple-macosx/release/md-babel:
-	swift build --scratch-path .build/$(version) --configuration release --triple x86_64-apple-macosx
+	swift build --quiet --scratch-path .build/$(version) --configuration release --triple x86_64-apple-macosx
 
 release/md-babel_macos-universal-$(version).tar.bz2: .build/$(version)/arm64-apple-macosx/release/md-babel .build/$(version)/x86_64-apple-macosx/release/md-babel
 	mkdir -p release/macos-universal-$(version)
