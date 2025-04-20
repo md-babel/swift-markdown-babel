@@ -22,7 +22,7 @@ release/md-babel_macos-universal-$(version).tar.bz2: .build/$(version)/arm64-app
 
 .PHONY: clean
 clean:
-	rm -rf release/*.tar.bz2 release/linux_* release/macos* release/md-babel
+	rm -rf release/*.tar.bz2 release/linux_* release/macos* release/md-babel*
 
 .PHONY: release
 release: $(linux_files) release/md-babel_macos-universal-$(version).tar.bz2
