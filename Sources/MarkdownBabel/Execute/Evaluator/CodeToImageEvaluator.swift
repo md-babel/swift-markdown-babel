@@ -19,9 +19,11 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 	}
 
 	public func run(
-		_ code: String,
+		_ executableContext: ExecutableContext,
 		sourceURL: URL?
 	) async throws -> Execute.Response.ExecutionResult.Output {
+		let code = executableContext.codeBlock.code
+
 		guard let hashContent = ContentHash(string: code, encoding: .utf8)
 		else { throw ExecutionFailure.hashingContentFailed(code) }
 

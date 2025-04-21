@@ -9,9 +9,11 @@ public struct CodeToCodeEvaluator: Evaluator, Sendable {
 	}
 
 	public func run(
-		_ code: String,
+		_ executableContext: ExecutableContext,
 		sourceURL: URL?
 	) async throws -> Execute.Response.ExecutionResult.Output {
+		let code = executableContext.codeBlock.code
+
 		let (terminationStatus, outputData) = try await runProcess(
 			configuration: self.configuration,
 			standardInput: code

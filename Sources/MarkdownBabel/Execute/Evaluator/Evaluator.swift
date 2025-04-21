@@ -3,7 +3,7 @@ import struct Foundation.URL
 
 public protocol Evaluator: Sendable {
 	func run(
-		_ input: String,
+		_ executableContext: ExecutableContext,
 		sourceURL: URL?
 	) async throws -> Execute.Response.ExecutionResult.Output
 }
