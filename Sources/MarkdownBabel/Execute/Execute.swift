@@ -20,7 +20,7 @@ public struct Execute {
 	public func execute(sourceURL: URL?) async -> Response {
 		let result: Execute.Response.ExecutionResult
 		do {
-			let output = try await evaluator.run(executableContext.codeBlock.code, sourceURL: sourceURL)
+			let output = try await evaluator.run(executableContext, sourceURL: sourceURL)
 			result = .init(output: output, error: nil)
 		} catch {
 			result = .init(output: nil, error: "\(error)")
