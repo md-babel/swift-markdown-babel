@@ -27,6 +27,15 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 		guard let hashContent = ContentHash(string: code, encoding: .utf8)
 		else { throw ExecutionFailure.hashingContentFailed(code) }
 
+		if let existingImageResult = executableContext.result?.content as? ImageResult,
+			hashContent.contentHash() == existingImageResult.contentHash
+		{
+			return .init(
+				insert: .image(path: existingImageResult.source, hash: existingImageResult.contentHash),
+				sideEffect: nil
+			)
+		}
+
 		let (_, outputData) = try await runProcess(
 			configuration: self.configuration,
 			standardInput: code
