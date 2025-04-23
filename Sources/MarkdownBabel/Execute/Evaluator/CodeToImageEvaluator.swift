@@ -30,6 +30,7 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 		guard let contentHash = ContentHash(string: code, encoding: .utf8)
 		else { throw ExecutionFailure.hashingContentFailed(code) }
 
+		// TODO: Re-generate files with same digest if path or extension changed: https://github.com/md-babel/swift-markdown-babel/issues/36
 		if let existingImageResult = executableContext.result?.content as? ImageResult,
 			contentHash.digest == existingImageResult.contentHash
 		{
