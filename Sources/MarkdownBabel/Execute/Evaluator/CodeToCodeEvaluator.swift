@@ -16,15 +16,7 @@ public struct CodeToCodeEvaluator: Evaluator, Sendable {
 	) async throws -> Execute.Response.ExecutionResult.Output {
 		let code = executableContext.codeBlock.code
 
-		// TODO: runPRocess can be throwing
-		let (result, outputData) = try await runProcess(input: code, additionalArguments: [])
-		let terminationStatus: RunProcess.TerminationStatus =
-			switch result {
-			case .right(let error):
-				throw ExecutionFailure.processExecutionFailed(error, result)
-			case .left(let status):
-				status
-			}
+		let (terminationStatus, outputData) = try await runProcess(input: code, additionalArguments: [])
 
 		guard let code = String(data: outputData, encoding: .utf8)
 		else { throw ExecutionFailure.processResultIsNotAString(outputData, terminationStatus) }
