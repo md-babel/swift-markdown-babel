@@ -15,7 +15,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 
 	@Option(
 		name: [.customShort("f"), .customLong("file")],
-		help: "Input file path.",
+		help: "File to execute code block in, instead of standard input.",
 		transform: { URL(fileURLWithPath: $0) }
 	)
 	var inputFile: URL?
@@ -66,7 +66,10 @@ struct ExecuteCommand: AsyncParsableCommand {
 		help: ArgumentHelp(
 			"Whether to load the user's global config file.",
 			discussion:
-				"Disabling the global user configuration without setting --config will result in no context being recognized."
+				"""
+				Note: If you use --no-load-user-config, you should set
+				--config to recognize any code block language at all.
+				"""
 		)
 	)
 	var loadUserConfig = true
