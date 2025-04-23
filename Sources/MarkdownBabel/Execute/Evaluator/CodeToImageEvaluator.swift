@@ -27,11 +27,11 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 	) async throws -> Execute.Response.ExecutionResult.Output {
 		let code = executableContext.codeBlock.code
 
-		guard let contentHash = ContentHash(string: code, encoding: .utf8)?.contentHash()
+		guard let contentHash = ContentHash(string: code, encoding: .utf8)
 		else { throw ExecutionFailure.hashingContentFailed(code) }
 
 		if let existingImageResult = executableContext.result?.content as? ImageResult,
-			contentHash == existingImageResult.contentHash
+			contentHash.digest == existingImageResult.contentHash
 		{
 			return .init(
 				insert: .image(path: existingImageResult.source, hash: existingImageResult.contentHash),
@@ -45,11 +45,11 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 		let filename = filename(
 			pattern: imageConfiguration.filenamePattern,
 			sourceFilename: sourceFilename,
-			contentHash: contentHash
+			contentHash: contentHash.digest
 		)
 		let imageURL: URL = generateImageFileURL(filename: filename, imageConfiguration: imageConfiguration)
 		return .init(
-			insert: .image(path: imageURL.absoluteURL.path, hash: contentHash),
+			insert: .image(path: imageURL.absoluteURL.path, hash: contentHash.digest),
 			sideEffect: .writeFile(outputData, to: imageURL)
 		)
 	}
