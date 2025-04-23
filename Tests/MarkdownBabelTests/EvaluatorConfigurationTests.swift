@@ -1,5 +1,6 @@
 // swift-format-ignore-file: AlwaysUseLowerCamelCase
 import DynamicJSON
+import Foundation
 import MarkdownBabel
 import Testing
 
@@ -88,5 +89,45 @@ import Testing
 				),
 			]
 		)
+	}
+
+	@Suite("makeEvaluator") struct MakeEvaluator {
+		@Test func codeToCode() throws {
+			let configuration = EvaluatorConfiguration(
+				executableURL: URL(filePath: "/file/path"),
+				arguments: ["a", "b"],
+				executableMarkupType: .codeBlock(language: "input"),
+				resultMarkupType: .codeBlock
+			)
+			let baseDir = URL(filePath: "/out/dir/")
+			let evaluator = try #require(configuration.makeEvaluator(outputDirectory: baseDir) as? CodeToCodeEvaluator)
+			#expect(evaluator.executableURL == URL(filePath: "/file/path"))
+			#expect(evaluator.defaultArguments == ["a", "b"])
+		}
+
+		@Test func codeToImage() throws {
+			let imageConfig = ImageEvaluationConfiguration(
+				fileExtension: "tiff",
+				directory: "./subdir/",
+				filenamePattern: "yyyyMM--'file'"
+			)
+			let configuration = EvaluatorConfiguration(
+				executableURL: URL(filePath: "/path/to/converter"),
+				arguments: ["x", "y"],
+				executableMarkupType: .codeBlock(language: "graphics"),
+				resultMarkupType: .image(imageConfig)
+			)
+			let baseDir = URL(filePath: "/out/dir/")
+			let evaluator = try #require(
+				configuration.makeEvaluator(outputDirectory: baseDir) as? CodeToImageEvaluator
+			)
+			let expectedGenerator = GenerateImageFileURL(
+				outputDirectory: baseDir
+			)
+			#expect(evaluator.imageConfiguration == imageConfig)
+			#expect(evaluator.generateImageFileURL == expectedGenerator)
+			#expect(evaluator.executableURL == URL(filePath: "/path/to/converter"))
+			#expect(evaluator.defaultArguments == ["x", "y"])
+		}
 	}
 }

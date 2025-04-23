@@ -16,7 +16,7 @@ struct POSIXError: Error, Equatable, Sendable, CustomStringConvertible {
 
 struct RunProcess {
 	typealias TerminationStatus = Int32
-	typealias TerminationStatusOrError = Either<TerminationStatus, String>
+	typealias TerminationStatusOrError = Result<TerminationStatus, Swift.Error>
 
 	/// Called when the tool has terminated.
 	///
@@ -99,9 +99,9 @@ struct RunProcess {
 		group.notify(queue: .main) {
 			let result: TerminationStatusOrError =
 				if let error = errorQ {
-					.right("\(error)")
+					.failure(error)
 				} else {
-					.left(proc.terminationStatus)
+					.success(proc.terminationStatus)
 				}
 			completionHandler(result, outputData)
 		}
@@ -243,27 +243,9 @@ extension RunProcess {
 	/// - Precondition: Must be run on the main queue.
 	@MainActor
 	func callAsFunction(
-		input data: Data,
-		additionalArguments: [String] = []
-	) async -> (result: TerminationStatusOrError, output: Data) {
-		dispatchPrecondition(condition: .onQueue(.main))
-		return await withCheckedContinuation { continuation in
-			RunProcess.launch(
-				tool: self.executableURL,
-				arguments: self.defaultArguments + additionalArguments,
-				input: data
-			) { (result, output) in
-				continuation.resume(returning: (result, output))
-			}
-		}
-	}
-
-	/// - Precondition: Must be run on the main queue.
-	@MainActor
-	func callAsFunction(
 		input string: String,
 		additionalArguments: [String] = []
-	) async throws -> (result: TerminationStatusOrError, output: Data) {
+	) async throws -> (terminationStatus: TerminationStatus, output: Data) {
 		dispatchPrecondition(condition: .onQueue(.main))
 		return try await withCheckedThrowingContinuation { continuation in
 			do {
@@ -272,7 +254,7 @@ extension RunProcess {
 					arguments: self.defaultArguments + additionalArguments,
 					input: string
 				) { (result, output) in
-					continuation.resume(returning: (result, output))
+					continuation.resume(with: result.map { ($0, output) })
 				}
 			} catch {
 				continuation.resume(throwing: error)
