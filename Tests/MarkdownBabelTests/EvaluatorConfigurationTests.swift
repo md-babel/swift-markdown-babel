@@ -100,33 +100,34 @@ import Testing
 				resultMarkupType: .codeBlock
 			)
 			let baseDir = URL(filePath: "/out/dir/")
-			let evaluator = try #require(
-				configuration.makeEvaluator(outputDirectory: baseDir) as? CodeToCodeEvaluator
-			)
-			#expect(evaluator.configuration == configuration)
+			let evaluator = try #require(configuration.makeEvaluator(outputDirectory: baseDir) as? CodeToCodeEvaluator)
+			#expect(evaluator.executableURL == URL(filePath: "/file/path"))
+			#expect(evaluator.defaultArguments == ["a", "b"])
 		}
 
 		@Test func codeToImage() throws {
+			let imageConfig = ImageEvaluationConfiguration(
+				fileExtension: "tiff",
+				directory: "./subdir/",
+				filenamePattern: "yyyyMM--'file'"
+			)
 			let configuration = EvaluatorConfiguration(
 				executableURL: URL(filePath: "/path/to/converter"),
-				arguments: ["a", "b"],
+				arguments: ["x", "y"],
 				executableMarkupType: .codeBlock(language: "graphics"),
-				resultMarkupType: .image(
-					fileExtension: "tiff",
-					directory: "./subdir/",
-					filenamePattern: "yyyyMM--'file'"
-				)
+				resultMarkupType: .image(imageConfig)
 			)
 			let baseDir = URL(filePath: "/out/dir/")
 			let evaluator = try #require(
 				configuration.makeEvaluator(outputDirectory: baseDir) as? CodeToImageEvaluator
 			)
 			let expectedGenerator = GenerateImageFileURL(
-				outputDirectory: baseDir,
-				fileExtension: "tiff"
+				outputDirectory: baseDir
 			)
-			#expect(evaluator.configuration == configuration)
+			#expect(evaluator.imageConfiguration == imageConfig)
 			#expect(evaluator.generateImageFileURL == expectedGenerator)
+			#expect(evaluator.executableURL == URL(filePath: "/path/to/converter"))
+			#expect(evaluator.defaultArguments == ["x", "y"])
 		}
 	}
 }

@@ -2,14 +2,12 @@ import struct Foundation.URL
 
 public struct GenerateImageFileURL: Equatable, Sendable {
 	public let outputDirectory: URL
-	public let fileExtension: String
 
-	public init(outputDirectory: URL, fileExtension: String) {
+	public init(outputDirectory: URL) {
 		self.outputDirectory = outputDirectory
-		self.fileExtension = fileExtension
 	}
 
-	public func url(filename: String, directory: String) -> URL {
+	public func url(filename: String, fileExtension: String, directory: String) -> URL {
 		return
 			URL(fileURLWithPath: directory, relativeTo: outputDirectory)
 			.appending(path: filename)
@@ -17,7 +15,23 @@ public struct GenerateImageFileURL: Equatable, Sendable {
 	}
 
 	@inlinable @inline(__always)
-	public func callAsFunction(filename: String, directory: String) -> URL {
-		return url(filename: filename, directory: directory)
+	public func callAsFunction(filename: String, fileExtension: String, directory: String) -> URL {
+		return url(filename: filename, fileExtension: fileExtension, directory: directory)
+	}
+}
+
+extension GenerateImageFileURL {
+	@inlinable @inline(__always)
+	public func url(filename: String, imageConfiguration: ImageEvaluationConfiguration) -> URL {
+		return url(
+			filename: filename,
+			fileExtension: imageConfiguration.fileExtension,
+			directory: imageConfiguration.directory
+		)
+	}
+
+	@inlinable @inline(__always)
+	public func callAsFunction(filename: String, imageConfiguration: ImageEvaluationConfiguration) -> URL {
+		return url(filename: filename, imageConfiguration: imageConfiguration)
 	}
 }

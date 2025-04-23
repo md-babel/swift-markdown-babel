@@ -49,14 +49,14 @@ extension EvaluatorConfiguration {
 	) -> any Evaluator {
 		switch (self.executableMarkupType, self.resultMarkupType) {
 		case (.codeBlock, .codeBlock):
-			return CodeToCodeEvaluator(configuration: self)
-		case (.codeBlock, .image(let imageConfig)):
+			return CodeToCodeEvaluator(runProcess: self.makeRunProcess())
+		case (.codeBlock, .image(let imageConfiguration)):
 			return CodeToImageEvaluator(
-				configuration: self,
+				runProcess: self.makeRunProcess(),
+				imageConfiguration: imageConfiguration,
 				generateImageFileURL: GenerateImageFileURL(
 					// TODO: Resolve imageConfig.directory relative to outputDirectory https://github.com/md-babel/swift-markdown-babel/issues/34
-					outputDirectory: outputDirectory,
-					fileExtension: imageConfig.fileExtension
+					outputDirectory: outputDirectory
 				)
 			)
 		}
