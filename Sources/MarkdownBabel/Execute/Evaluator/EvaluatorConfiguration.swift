@@ -54,10 +54,9 @@ extension EvaluatorConfiguration {
 			return CodeToImageEvaluator(
 				configuration: self,
 				generateImageFileURL: GenerateImageFileURL(
-					// TODO: Resolve imageConfig.directory using to outputDirectory https://github.com/md-babel/swift-markdown-babel/issues/34
+					// TODO: Resolve imageConfig.directory relative to outputDirectory https://github.com/md-babel/swift-markdown-babel/issues/34
 					outputDirectory: outputDirectory,
-					// TODO: Make file extension configurable in converter https://github.com/md-babel/swift-markdown-babel/issues/32
-					fileExtension: "svg"
+					fileExtension: imageConfig.fileExtension
 				)
 			)
 		}

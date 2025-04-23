@@ -1,6 +1,6 @@
 import struct Foundation.URL
 
-public struct GenerateImageFileURL: Sendable {
+public struct GenerateImageFileURL: Equatable, Sendable {
 	public let outputDirectory: URL
 	public let fileExtension: String
 
