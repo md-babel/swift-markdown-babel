@@ -45,13 +45,21 @@ extension EvaluatorConfiguration {
 
 extension EvaluatorConfiguration {
 	public func makeEvaluator(
-		generateImageFileURL: GenerateImageFileURL
+		outputDirectory: URL
 	) -> any Evaluator {
 		switch (self.executableMarkupType, self.resultMarkupType) {
 		case (.codeBlock, .codeBlock):
 			return CodeToCodeEvaluator(configuration: self)
-		case (.codeBlock, .image):
-			return CodeToImageEvaluator(configuration: self, generateImageFileURL: generateImageFileURL)
+		case (.codeBlock, .image(let imageConfig)):
+			return CodeToImageEvaluator(
+				configuration: self,
+				generateImageFileURL: GenerateImageFileURL(
+					// TODO: Resolve imageConfig.directory using to outputDirectory https://github.com/md-babel/swift-markdown-babel/issues/34
+					outputDirectory: outputDirectory,
+					// TODO: Make file extension configurable in converter https://github.com/md-babel/swift-markdown-babel/issues/32
+					fileExtension: "svg"
+				)
+			)
 		}
 	}
 }
