@@ -268,7 +268,6 @@ func range(
 
 		@Test("returns code block with image paragraph result") func returnsCodeBlockWithImageParagraphResult() throws {
 			let document = makeDocument(followCodeWithBlock: Self.resultBlock)
-			print(document.debugDescription())
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
 				Code:
