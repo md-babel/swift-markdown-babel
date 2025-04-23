@@ -50,6 +50,23 @@ struct ExecuteCommand: AsyncParsableCommand {
 		Markdown.SourceLocation(line: line, column: column, source: inputFile)
 	}
 
+	// MAR: - Working directory
+
+	@Option(
+		name: [.customShort("d"), .customLong("dir")],
+		help: ArgumentHelp(
+			"Working directory used to resolve relative paths. ",
+			discussion:
+				"""
+				Compiler and image generator configurations can use relative paths to put build
+				artifacts and assets there, respectively. In large writing projects, set this to
+				the project root. Defaults to a temporary directory if unset.
+				""",
+			valueName: "/path/to/project"
+		)
+	)
+	var workingDirectoryPath: String?
+
 	// MARK: - Config File
 
 	@Option(
@@ -106,13 +123,11 @@ struct ExecuteCommand: AsyncParsableCommand {
 }
 
 extension ExecuteCommand {
-	func outputDirectory(
-		outputPath: String? = nil
-	) throws(EvaluatorRegistryFailure) -> URL {
-		guard let outputPath else {
+	func outputDirectory() throws(EvaluatorRegistryFailure) -> URL {
+		guard let workingDirectoryPath else {
 			return try makeTemporaryOutputDirectory()
 		}
-		return try directory(forPath: outputPath)
+		return try directory(forPath: workingDirectoryPath)
 	}
 
 	private func makeTemporaryOutputDirectory() throws(EvaluatorRegistryFailure) -> URL {

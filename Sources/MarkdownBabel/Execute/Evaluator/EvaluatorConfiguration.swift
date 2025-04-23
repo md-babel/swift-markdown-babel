@@ -55,7 +55,6 @@ extension EvaluatorConfiguration {
 				runProcess: self.makeRunProcess(),
 				imageConfiguration: imageConfiguration,
 				generateImageFileURL: GenerateImageFileURL(
-					// TODO: Resolve imageConfig.directory relative to outputDirectory https://github.com/md-babel/swift-markdown-babel/issues/34
 					outputDirectory: outputDirectory
 				)
 			)
