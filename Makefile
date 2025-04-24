@@ -1,5 +1,8 @@
 SHELL=/bin/bash -o pipefail
 
+prefix ?= /usr/local
+bindir = $(prefix)/bin
+
 version := $(shell git describe --tags)
 
 linux_files = release/md-babel_linux-amd64-$(version).tar.bz2 release/md-babel_linux-arm64-$(version).tar.bz2
@@ -26,3 +29,13 @@ clean:
 
 .PHONY: release
 release: $(linux_files) release/md-babel_macos-universal-$(version).tar.bz2
+
+
+.PHONY: build
+build:
+	swift build --configuration release
+
+.PHONY: install
+install: build
+	install -d "$(bindir)"
+	install ".build/release/md-babel" "$(bindir)"
