@@ -34,7 +34,7 @@ extension EvaluatorConfiguration {
 		case .right(let dictionary) where dictionary["type"] == "image":
 			resultMarkupType = .image(
 				fileExtension: try dictionary.ensureValue("extension"),
-				directory: try dictionary.ensureValue("directory"),
+				directory: dictionary["directory"],
 				filenamePattern: try dictionary.ensureValue("filename")
 			)
 		default:
@@ -54,12 +54,14 @@ extension EvaluatorConfiguration {
 			switch self.resultMarkupType {
 			case .codeBlock: .left("codeBlock")
 			case .image(let config):
-				.right([
-					"type": "image",
-					"extension": config.fileExtension,
-					"directory": config.directory,
-					"filename": config.filenamePattern,
-				])
+				.right(
+					[
+						"type": "image",
+						"extension": config.fileExtension,
+						"directory": config.directory,
+						"filename": config.filenamePattern,
+					].compactMapValues { $0 }
+				)
 			}
 		let rep = Representation(
 			path: self.executableURL.path(),

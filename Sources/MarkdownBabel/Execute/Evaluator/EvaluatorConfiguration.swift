@@ -45,7 +45,8 @@ extension EvaluatorConfiguration {
 
 extension EvaluatorConfiguration {
 	public func makeEvaluator(
-		outputDirectory: URL
+		outputDirectory: URL,
+		produceRelativePaths: Bool
 	) -> any Evaluator {
 		switch (self.executableMarkupType, self.resultMarkupType) {
 		case (.codeBlock, .codeBlock):
@@ -55,7 +56,8 @@ extension EvaluatorConfiguration {
 				runProcess: self.makeRunProcess(),
 				imageConfiguration: imageConfiguration,
 				generateImageFileURL: GenerateImageFileURL(
-					outputDirectory: outputDirectory
+					outputDirectory: outputDirectory,
+					produceRelativePaths: produceRelativePaths
 				)
 			)
 		}

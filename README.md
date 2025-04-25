@@ -73,19 +73,60 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
 
 ### Execute Block
 
-    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--no-load-user-config] [--config <config>]
+    Usage: md-babel execute [--file <file>] [--filename <filename>] --line <line> --column <column> [--dir </path/to/project>] [--config <config>] [--no-load-user-config]
 
-1. Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
-2. execute it in its context,
-3. and produce a [md-babel:execute-block:response][execute-block-schema]-formatted JSON to stdandard output.
+1.  Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
+2.  execute it in its context,
+3.  and produce a [md-babel:execute-block:response][execute-block-schema]-formatted JSON to stdandard output.
 
-The optional `--config` uses a separate environment configuration file that is merged with the user's global configuration.
+    Client editors can then process the resulting JSON response to insert the result of the code block. 
+    See for [a reference implementation in Emacs][md-babel.el] or [the Visual Studio Code plugin][vscode].
+    
+Other options:
 
-Client editors can then process this to insert the result of the code block. 
-See [md-babel.el][] for an implementation in Emacs.
+-   The `--filename` argument can be used (by editors) to enforce either provide a filename even though standard input is used, or to shadow the filename part from `<file>`.
+    Shadowing can be useful to strip filenames from date-time strings or other metadata first, and extract the human-readable part.
+    Image generators use this in their output file name patterns.
+-   The `--no-load-user-config` flag determines whether the [global configuration file](#configuration-file) should be used.
+    If you toggle this but then don't pass a `--config` file path to use instead, no code block evaluators will be known.
+-   The optional `--config` argument loads a configuration file that is merged with the user's global configuration by default. 
+    If you combine this with `--no-load-user-config`, only the config file you pass here will be used.
+-   The optional `--dir` can be used to resolve relative build product paths from code blocks, including images.
+    Editors set this to the project or workspace directory to put assets in a common folder.
+    The default (unset) uses temporary directories.
+  
+    The effective evaluator configuration should _not_ use absolute output `"directory"` keys for relative paths to work. 
+    Leaving the `"directory"` key out completely will put images in the project root; 
+    using relative directives like `"directory": "./assets"` will put them in a shared subdirectory.
+-   The `--no-relative-paths` flag forces e.g. image literals to always use absolute paths. 
+    By default, relative paths will be preferred. 
+    Relative paths are based on the `--dir` argument, if present, falling back to the dirname of `--file`, if present. 
+    Without both, paths are resolved against the default temporary directory.
+
+Examples for image output and the literal inserted into your document:
+
+- ```
+  Given arguments            : --file /home/you/test.md
+  and evaluator directory    : "./assets"
+  Then creates image at path : /tmp/assets/image.png
+  and literal output         : ![](/tmp/assets/image.png)
+  ```
+- ```
+  Given arguments            : --file /home/you/test.md --dir /home/you
+  and evaluator directory    : "./assets"
+  Then creates image at path : /home/you/assets/image.png
+  and literal output         : ![](assets/image.png)
+  ```
+- ```
+  Given arguments            : --file /home/you/test.md --dir /home/you --no-relative-paths
+  and evaluator directory    : "./assets"
+  Then creates image at path : /home/you/assets/image.png
+  and literal output         : ![](/home/you/assets/image.png)
+  ```
 
 [execute-block-schema]: https://github.com/md-babel/md-babel-schema/tree/main/execute-block
 [md-babel.el]: https://github.com/md-babel/md-babel.el
+[vscode]: https://github.com/md-babel/vscode-md-babel
 
 ### Configuration
 
@@ -131,6 +172,8 @@ Here's a simple example for shell scripts and Python:
 
 If you can rely on `/usr/bin/env`, like with hash-bangs, you can set and forget it. 
 (With pyenv, rbenv, asdf, ... your mileage may vary!)
+
+[See the examples file](Examples.md) to learn how to configure various evaluators.
 
 [config-schema]: https://github.com/md-babel/md-babel-schema/tree/main/config
 

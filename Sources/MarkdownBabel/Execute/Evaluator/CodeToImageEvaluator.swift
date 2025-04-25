@@ -22,8 +22,7 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 	}
 
 	public func run(
-		_ executableContext: ExecutableContext,
-		sourceURL: URL?
+		_ executableContext: ExecutableContext
 	) async throws -> Execute.Response.ExecutionResult.Output {
 		let code = executableContext.codeBlock.code
 
@@ -42,16 +41,15 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 
 		let (_, outputData) = try await runProcess(input: code, additionalArguments: [])
 
-		let sourceFilename = sourceURL?.deletingPathExtension().lastPathComponent ?? "STDIN"
 		let filename = filename(
 			pattern: imageConfiguration.filenamePattern,
-			sourceFilename: sourceFilename,
+			sourceFilename: executableContext.file.filename,
 			contentHash: contentHash.digest
 		)
-		let imageURL: URL = generateImageFileURL(filename: filename, imageConfiguration: imageConfiguration)
+		let imageFileURL = generateImageFileURL(filename: filename, imageConfiguration: imageConfiguration)
 		return .init(
-			insert: .image(path: imageURL.absoluteURL.path, hash: contentHash.digest),
-			sideEffect: .writeFile(outputData, to: imageURL)
+			insert: .image(path: imageFileURL.path(), hash: contentHash.digest),
+			sideEffect: .writeFile(outputData, to: imageFileURL.fileURL)
 		)
 	}
 }

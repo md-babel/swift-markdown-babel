@@ -11,7 +11,7 @@ public enum EvaluationResultMarkup: Hashable, Sendable {
 
 	public static func image(
 		fileExtension: String,
-		directory: String,
+		directory: String?,
 		filenamePattern: String
 	) -> EvaluationResultMarkup {
 		return .image(.init(fileExtension: fileExtension, directory: directory, filenamePattern: filenamePattern))
@@ -24,7 +24,7 @@ extension EvaluationResultMarkup: CustomStringConvertible {
 		case .codeBlock:
 			"code block"
 		case .image(let config):
-			"image (\(config.directory)/\(config.filenamePattern).\(config.fileExtension))"
+			"image (\(config))"
 		}
 	}
 }

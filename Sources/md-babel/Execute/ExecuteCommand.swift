@@ -20,11 +20,17 @@ struct ExecuteCommand: AsyncParsableCommand {
 	)
 	var inputFile: URL?
 
+	@Option(
+		name: .customLong("filename"),
+		help: "Surrogate filename of the document, used in filename generators and references."
+	)
+	var filename: String?
+
 	func markdownDocument() throws -> MarkdownDocument {
 		if let inputFile {
 			return try MarkdownDocument(parsing: inputFile)
 		} else if let string = try stringFromStdin() {
-			return MarkdownDocument(parsing: string)
+			return MarkdownDocument(parsing: string, file: filename.map(File.init(filename:)) ?? .standardInput)
 		} else {
 			// To test this, try to `readLine()` twice; the second one will fail because STDIN has already been emptied.
 			throw GenericError(message: "Provide either non-empty STDIN or input file")
@@ -55,7 +61,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 	@Option(
 		name: [.customShort("d"), .customLong("dir")],
 		help: ArgumentHelp(
-			"Working directory used to resolve relative paths. ",
+			"Working directory used to resolve relative paths.",
 			discussion:
 				"""
 				Compiler and image generator configurations can use relative paths to put build
@@ -66,6 +72,16 @@ struct ExecuteCommand: AsyncParsableCommand {
 		)
 	)
 	var workingDirectoryPath: String?
+
+	@Flag(
+		name: .customLong("relative-paths"),
+		inversion: .prefixedNo,
+		exclusivity: .exclusive,
+		help: "Whether to use relative paths when possible."
+	)
+	var allowsRelativePaths = true
+
+	var produceRelativePaths: Bool { allowsRelativePaths && workingDirectoryPath != nil }
 
 	// MARK: - Config File
 
@@ -107,11 +123,11 @@ struct ExecuteCommand: AsyncParsableCommand {
 		}
 		let configuration = try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock)
 		let evaluator = configuration.makeEvaluator(
-			// TODO: Use output path command-lind argument https://github.com/md-babel/swift-markdown-babel/issues/34
-			outputDirectory: try outputDirectory()
+			outputDirectory: try outputDirectory(),
+			produceRelativePaths: produceRelativePaths
 		)
 		let execute = Execute(executableContext: context, evaluator: evaluator)
-		let response = await execute(sourceURL: inputFile)
+		let response = await execute()
 
 		try perform(sideEffect: response.executionResult.output?.sideEffect)
 
