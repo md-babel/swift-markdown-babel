@@ -17,9 +17,9 @@ public struct ImageFileURL: Equatable, Sendable {
 
 	public func path() -> String {
 		guard let relativizigWorkingDirectory else {
-			return fileURL.path()
+			return fileURL.absoluteURL.path()
 		}
 
-		return fileURL.relativePath(resolvedAgainst: relativizigWorkingDirectory)
+		return fileURL.absoluteURL.relativePath(resolvedAgainst: relativizigWorkingDirectory)
 	}
 }
