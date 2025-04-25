@@ -7,15 +7,21 @@ public struct GenerateImageFileURL: Equatable, Sendable {
 		self.outputDirectory = outputDirectory
 	}
 
-	public func url(filename: String, fileExtension: String, directory: String) -> URL {
+	public func url(filename: String, fileExtension: String, directory: String?) -> URL {
+		let baseDirectory =
+			if let directory {
+				URL(fileURLWithPath: directory, relativeTo: outputDirectory)
+			} else {
+				outputDirectory
+			}
 		return
-			URL(fileURLWithPath: directory, relativeTo: outputDirectory)
+			baseDirectory
 			.appending(path: filename)
 			.appendingPathExtension(fileExtension)
 	}
 
 	@inlinable @inline(__always)
-	public func callAsFunction(filename: String, fileExtension: String, directory: String) -> URL {
+	public func callAsFunction(filename: String, fileExtension: String, directory: String?) -> URL {
 		return url(filename: filename, fileExtension: fileExtension, directory: directory)
 	}
 }
