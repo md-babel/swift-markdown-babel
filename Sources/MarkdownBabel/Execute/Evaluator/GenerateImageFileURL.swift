@@ -2,14 +2,14 @@ import struct Foundation.URL
 
 public struct GenerateImageFileURL: Equatable, Sendable {
 	public let outputDirectory: URL
-	public let relativizePaths: Bool
+	public let produceRelativePaths: Bool
 
 	public init(
 		outputDirectory: URL,
-		relativizePaths: Bool
+		produceRelativePaths: Bool
 	) {
 		self.outputDirectory = outputDirectory
-		self.relativizePaths = relativizePaths
+		self.produceRelativePaths = produceRelativePaths
 	}
 
 	public func url(
@@ -29,7 +29,7 @@ public struct GenerateImageFileURL: Equatable, Sendable {
 			.appendingPathExtension(fileExtension)
 		return ImageFileURL(
 			fileURL: fileURL,
-			relativizigWorkingDirectory: relativizePaths ? outputDirectory : nil
+			relativizigWorkingDirectory: produceRelativePaths ? outputDirectory : nil
 		)
 	}
 

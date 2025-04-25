@@ -103,7 +103,7 @@ import Testing
 			let evaluator = try #require(
 				configuration.makeEvaluator(
 					outputDirectory: baseDir,
-					relativizePaths: false  // Irrelevant/unused in this evaluator
+					produceRelativePaths: false  // Irrelevant/unused in this evaluator
 				) as? CodeToCodeEvaluator
 			)
 			#expect(evaluator.executableURL == URL(filePath: "/file/path"))
@@ -113,7 +113,7 @@ import Testing
 		@Test(arguments: [
 			true,
 			false,
-		]) func codeToImage(relativizePaths: Bool) throws {
+		]) func codeToImage(produceRelativePaths: Bool) throws {
 			let imageConfig = ImageEvaluationConfiguration(
 				fileExtension: "tiff",
 				directory: "./subdir/",
@@ -129,12 +129,12 @@ import Testing
 			let evaluator = try #require(
 				configuration.makeEvaluator(
 					outputDirectory: baseDir,
-					relativizePaths: relativizePaths
+					produceRelativePaths: produceRelativePaths
 				) as? CodeToImageEvaluator
 			)
 			let expectedGenerator = GenerateImageFileURL(
 				outputDirectory: baseDir,
-				relativizePaths: relativizePaths
+				produceRelativePaths: produceRelativePaths
 			)
 			#expect(evaluator.imageConfiguration == imageConfig)
 			#expect(evaluator.generateImageFileURL == expectedGenerator)

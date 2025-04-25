@@ -75,7 +75,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 	)
 	var allowsRelativePaths = true
 
-	var relativizePaths: Bool { allowsRelativePaths && workingDirectoryPath != nil }
+	var produceRelativePaths: Bool { allowsRelativePaths && workingDirectoryPath != nil }
 
 	// MARK: - Config File
 
@@ -118,7 +118,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 		let configuration = try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock)
 		let evaluator = configuration.makeEvaluator(
 			outputDirectory: try outputDirectory(),
-			relativizePaths: relativizePaths
+			produceRelativePaths: produceRelativePaths
 		)
 		let execute = Execute(executableContext: context, evaluator: evaluator)
 		let response = await execute(sourceURL: inputFile)
