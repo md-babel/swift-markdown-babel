@@ -4,7 +4,7 @@ import Testing
 import struct Foundation.URL
 
 extension URL {
-	/// Programmatic URL intialization from string literals. Raises exception when this fails, as a programmer error.
+	/// Programmatic URL initialization from string literals. Raises exception when this fails, as a programmer error.
 	fileprivate init(_ staticString: StaticString) {
 		guard let url = URL(string: "\(staticString)") else {
 			preconditionFailure("URL could not be created from string literal \(staticString)")

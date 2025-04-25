@@ -79,7 +79,7 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
 2.  execute it in its context,
 3.  and produce a [md-babel:execute-block:response][execute-block-schema]-formatted JSON to stdandard output.
 
-    Client editors can then process rhe resulting JSON response to insert the result of the code block. 
+    Client editors can then process the resulting JSON response to insert the result of the code block. 
     See for [a reference implementation in Emacs][md-babel.el] or [the Visual Studio Code plugin][vscode].
     
 Other options:
