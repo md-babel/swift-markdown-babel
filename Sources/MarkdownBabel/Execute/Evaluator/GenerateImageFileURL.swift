@@ -2,16 +2,20 @@ import struct Foundation.URL
 
 public struct GenerateImageFileURL: Equatable, Sendable {
 	public let outputDirectory: URL
+	public let relativizePaths: Bool
 
-	public init(outputDirectory: URL) {
+	public init(
+		outputDirectory: URL,
+		relativizePaths: Bool
+	) {
 		self.outputDirectory = outputDirectory
+		self.relativizePaths = relativizePaths
 	}
 
 	public func url(
 		filename: String,
 		fileExtension: String,
-		directory: String?,
-		relativizePath: Bool
+		directory: String?
 	) -> ImageFileURL {
 		let baseDirectory =
 			if let directory {
@@ -25,7 +29,7 @@ public struct GenerateImageFileURL: Equatable, Sendable {
 			.appendingPathExtension(fileExtension)
 		return ImageFileURL(
 			fileURL: fileURL,
-			relativizigWorkingDirectory: relativizePath ? outputDirectory : nil
+			relativizigWorkingDirectory: relativizePaths ? outputDirectory : nil
 		)
 	}
 
@@ -33,14 +37,12 @@ public struct GenerateImageFileURL: Equatable, Sendable {
 	public func callAsFunction(
 		filename: String,
 		fileExtension: String,
-		directory: String?,
-		relativizePath: Bool
+		directory: String?
 	) -> ImageFileURL {
 		return url(
 			filename: filename,
 			fileExtension: fileExtension,
-			directory: directory,
-			relativizePath: relativizePath
+			directory: directory
 		)
 	}
 }
@@ -49,27 +51,23 @@ extension GenerateImageFileURL {
 	@inlinable @inline(__always)
 	public func url(
 		filename: String,
-		imageConfiguration: ImageEvaluationConfiguration,
-		relativizePath: Bool
+		imageConfiguration: ImageEvaluationConfiguration
 	) -> ImageFileURL {
 		return url(
 			filename: filename,
 			fileExtension: imageConfiguration.fileExtension,
-			directory: imageConfiguration.directory,
-			relativizePath: relativizePath
+			directory: imageConfiguration.directory
 		)
 	}
 
 	@inlinable @inline(__always)
 	public func callAsFunction(
 		filename: String,
-		imageConfiguration: ImageEvaluationConfiguration,
-		relativizePath: Bool
+		imageConfiguration: ImageEvaluationConfiguration
 	) -> ImageFileURL {
 		return url(
 			filename: filename,
-			imageConfiguration: imageConfiguration,
-			relativizePath: relativizePath
+			imageConfiguration: imageConfiguration
 		)
 	}
 }

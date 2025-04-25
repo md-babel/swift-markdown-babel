@@ -100,12 +100,20 @@ import Testing
 				resultMarkupType: .codeBlock
 			)
 			let baseDir = URL(filePath: "/out/dir/")
-			let evaluator = try #require(configuration.makeEvaluator(outputDirectory: baseDir) as? CodeToCodeEvaluator)
+			let evaluator = try #require(
+				configuration.makeEvaluator(
+					outputDirectory: baseDir,
+					relativizePaths: false  // Irrelevant/unused in this evaluator
+				) as? CodeToCodeEvaluator
+			)
 			#expect(evaluator.executableURL == URL(filePath: "/file/path"))
 			#expect(evaluator.defaultArguments == ["a", "b"])
 		}
 
-		@Test func codeToImage() throws {
+		@Test(arguments: [
+			true,
+			false,
+		]) func codeToImage(relativizePaths: Bool) throws {
 			let imageConfig = ImageEvaluationConfiguration(
 				fileExtension: "tiff",
 				directory: "./subdir/",
@@ -119,10 +127,14 @@ import Testing
 			)
 			let baseDir = URL(filePath: "/out/dir/")
 			let evaluator = try #require(
-				configuration.makeEvaluator(outputDirectory: baseDir) as? CodeToImageEvaluator
+				configuration.makeEvaluator(
+					outputDirectory: baseDir,
+					relativizePaths: relativizePaths
+				) as? CodeToImageEvaluator
 			)
 			let expectedGenerator = GenerateImageFileURL(
-				outputDirectory: baseDir
+				outputDirectory: baseDir,
+				relativizePaths: relativizePaths
 			)
 			#expect(evaluator.imageConfiguration == imageConfig)
 			#expect(evaluator.generateImageFileURL == expectedGenerator)

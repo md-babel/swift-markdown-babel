@@ -49,11 +49,7 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 			sourceFilename: sourceFilename,
 			contentHash: contentHash.digest
 		)
-		let imageFileURL = generateImageFileURL(
-			filename: filename,
-			imageConfiguration: imageConfiguration,
-			relativizePath: false
-		)
+		let imageFileURL = generateImageFileURL(filename: filename, imageConfiguration: imageConfiguration)
 		return .init(
 			insert: .image(path: imageFileURL.path(), hash: contentHash.digest),
 			sideEffect: .writeFile(outputData, to: imageFileURL.fileURL)
