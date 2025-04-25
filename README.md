@@ -102,19 +102,25 @@ Other options:
 
 Examples for image output and the literal inserted into your document:
 
-- Given arguments: `--file /home/you/test.md`  
-  and evaluator directory: `"./assets"`  
-  Then creates image at path: `/tmp/assets/image.png`  
-  and literal output: `![](/tmp/assets/image.png)`
-- Given arguments: `--file /home/you/test.md --dir /home/you`  
-  and evaluator directory: `"./assets"`  
-  Then creates image at path: `/home/you/assets/image.png`  
-  and literal output: `![](assets/image.png)`
-- Given arguments: `--file /home/you/test.md --dir /home/you --no-relative-paths`  
-  and evaluator directory: `"./assets"`  
-  Then creates image at path: `/home/you/assets/image.png`  
-  and literal output: `![](/home/you/assets/image.png)`
-  
+- ```
+  Given arguments            : --file /home/you/test.md
+  and evaluator directory    : "./assets"
+  Then creates image at path : /tmp/assets/image.png
+  and literal output         : ![](/tmp/assets/image.png)
+  ```
+- ```
+  Given arguments            : --file /home/you/test.md --dir /home/you
+  and evaluator directory    : "./assets"
+  Then creates image at path : /home/you/assets/image.png
+  and literal output         : ![](assets/image.png)
+  ```
+- ```
+  Given arguments            : --file /home/you/test.md --dir /home/you --no-relative-paths
+  and evaluator directory    : "./assets"
+  Then creates image at path : /home/you/assets/image.png
+  and literal output         : ![](/home/you/assets/image.png)
+  ```
+
 [execute-block-schema]: https://github.com/md-babel/md-babel-schema/tree/main/execute-block
 [md-babel.el]: https://github.com/md-babel/md-babel.el
 [vscode]: https://github.com/md-babel/vscode-md-babel
