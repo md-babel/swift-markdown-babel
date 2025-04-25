@@ -36,6 +36,7 @@ extension MarkdownDocument {
 
 		return ExecutableContext(
 			codeBlock: codeBlockAtLocation,
+			inFile: sourceURL,
 			result: result,
 			error: error
 		)

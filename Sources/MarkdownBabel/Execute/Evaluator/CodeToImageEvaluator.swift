@@ -22,8 +22,7 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 	}
 
 	public func run(
-		_ executableContext: ExecutableContext,
-		sourceURL: URL?
+		_ executableContext: ExecutableContext
 	) async throws -> Execute.Response.ExecutionResult.Output {
 		let code = executableContext.codeBlock.code
 
@@ -43,7 +42,7 @@ public struct CodeToImageEvaluator: Evaluator, Sendable {
 		let (_, outputData) = try await runProcess(input: code, additionalArguments: [])
 
 		// TODO: Introduce a --filename cli argument to set the filename even when passing in content via stdin: https://github.com/md-babel/swift-markdown-babel/issues/37
-		let sourceFilename = sourceURL?.deletingPathExtension().lastPathComponent ?? "STDIN"
+		let sourceFilename = executableContext.sourceURL?.deletingPathExtension().lastPathComponent ?? "STDIN"
 		let filename = filename(
 			pattern: imageConfiguration.filenamePattern,
 			sourceFilename: sourceFilename,

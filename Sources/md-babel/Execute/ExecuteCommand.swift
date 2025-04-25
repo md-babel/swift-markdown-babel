@@ -121,7 +121,7 @@ struct ExecuteCommand: AsyncParsableCommand {
 			produceRelativePaths: produceRelativePaths
 		)
 		let execute = Execute(executableContext: context, evaluator: evaluator)
-		let response = await execute(sourceURL: inputFile)
+		let response = await execute()
 
 		try perform(sideEffect: response.executionResult.output?.sideEffect)
 

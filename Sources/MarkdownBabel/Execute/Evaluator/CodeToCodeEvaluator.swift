@@ -11,8 +11,7 @@ public struct CodeToCodeEvaluator: Evaluator, Sendable {
 	}
 
 	public func run(
-		_ executableContext: ExecutableContext,
-		sourceURL: URL?
+		_ executableContext: ExecutableContext
 	) async throws -> Execute.Response.ExecutionResult.Output {
 		let code = executableContext.codeBlock.code
 

@@ -33,6 +33,7 @@ func range(
 @Suite("ExecutableContext at location") struct ExecutableContextAtLocation {
 	private static func makeDocument(
 		followCodeWithBlock firstBlock: String = "",
+		sourceURL: URL? = nil,
 		andThen secondBlock: String = ""
 	) -> MarkdownDocument {
 		return MarkdownDocument(
@@ -48,7 +49,8 @@ func range(
 				\(secondBlock)
 
 				after
-				"""
+				""",
+			sourceURL: sourceURL
 		)
 	}
 
@@ -63,13 +65,14 @@ func range(
 				```
 
 				after
-				"""
+				""",
+			sourceURL: URL(filePath: "/path/to/my/file.md")
 		)
 
 		@Test func returnsCodeBlockOnly() throws {
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
-				Code:
+				Code (/path/to/my/file.md):
 				├─ CodeBlock @3:1-6:4 language: agda
 				│  η-× : ∀ {A B : Set} (w : A × B) → ⟨ proj₁ w , proj₂ w ⟩ ≡ w
 				│  η-× w = refl
@@ -97,7 +100,7 @@ func range(
 		@Test func returnsCodeBlockOnly() throws {
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
-				Code:
+				Code (STDIN):
 				├─ CodeBlock @3:1-5:4 language: sh
 				│  date
 				Result:
@@ -120,10 +123,13 @@ func range(
 			"""
 
 		@Test func returnsCodeBlockWithCodeBlockResult() throws {
-			let document = makeDocument(followCodeWithBlock: Self.resultBlock)
+			let document = makeDocument(
+				followCodeWithBlock: Self.resultBlock,
+				sourceURL: URL(filePath: "/code/file.md")
+			)
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
-				Code:
+				Code (/code/file.md):
 				├─ CodeBlock @3:1-5:4 language: sh
 				│  date
 				Result:
@@ -155,7 +161,7 @@ func range(
 				)
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
-					Code:
+					Code (STDIN):
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
@@ -194,7 +200,7 @@ func range(
 			@Test func returnsCodeBlockWithFirstCodeBlockResult() throws {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
-					Code:
+					Code (STDIN):
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
@@ -233,7 +239,7 @@ func range(
 			@Test func returnsCodeBlockWithCodeBlockResultAndError() throws {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
-					Code:
+					Code (STDIN):
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
@@ -270,7 +276,7 @@ func range(
 			let document = makeDocument(followCodeWithBlock: Self.resultBlock)
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
-				Code:
+				Code (STDIN):
 				├─ CodeBlock @3:1-5:4 language: sh
 				│  date
 				Result:
@@ -304,7 +310,7 @@ func range(
 				)
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
-					Code:
+					Code (STDIN):
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
@@ -343,7 +349,7 @@ func range(
 			{
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
-					Code:
+					Code (STDIN):
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
@@ -381,7 +387,7 @@ func range(
 			@Test func returnsCodeBlockWithImageParagraphResultAndError() throws {
 				let location = SourceLocation(line: 4, column: 1, source: nil)
 				let expectedDump = """
-					Code:
+					Code (STDIN):
 					├─ CodeBlock @3:1-5:4 language: sh
 					│  date
 					Result:
@@ -453,7 +459,7 @@ func range(
 
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
-				Code:
+				Code (STDIN):
 				├─ CodeBlock @3:1-5:4 language: sh
 				│  date
 				Result:

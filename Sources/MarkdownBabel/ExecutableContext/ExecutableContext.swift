@@ -1,5 +1,7 @@
 import Markdown
 
+import struct Foundation.URL
+
 // TODO: Make ExecutableContext sendable https://github.com/md-babel/swift-markdown-babel/issues/21
 public struct ExecutableContext {
 	public struct Result {
@@ -21,6 +23,7 @@ public struct ExecutableContext {
 	}
 
 	public let codeBlock: Markdown.CodeBlock
+	public let sourceURL: URL?
 	public let result: Result?
 	public let error: Error?
 
@@ -37,11 +40,13 @@ public struct ExecutableContext {
 
 	public init(
 		codeBlock: CodeBlock,
+		inFile sourceURL: URL? = nil,
 		result: Result? = nil,
 		error: Error? = nil
 	) {
 		precondition(codeBlock.range != nil, "CodeBlock needs to come from a document and have a range")
 		self.codeBlock = codeBlock
+		self.sourceURL = sourceURL
 		self.result = result
 		self.error = error
 	}
@@ -54,7 +59,7 @@ extension ExecutableContext: CustomDebugStringConvertible {
 
 	public func debugDescription(options: MarkupDumpOptions = []) -> String {
 		return """
-			Code:
+			Code (\(sourceURL?.path ?? "STDIN")):
 			\(codeBlock.debugDescription(options: options))
 			Result:
 			\(result?.debugDescription(options: options) ?? "(No Result)")

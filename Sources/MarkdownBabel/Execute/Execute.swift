@@ -13,14 +13,14 @@ public struct Execute {
 	}
 
 	@inlinable @inline(__always)
-	public func callAsFunction(sourceURL: URL?) async -> Response {
-		return await execute(sourceURL: sourceURL)
+	public func callAsFunction() async -> Response {
+		return await execute()
 	}
 
-	public func execute(sourceURL: URL?) async -> Response {
+	public func execute() async -> Response {
 		let result: Execute.Response.ExecutionResult
 		do {
-			let output = try await evaluator.run(executableContext, sourceURL: sourceURL)
+			let output = try await evaluator.run(executableContext)
 			result = .init(output: output, error: nil)
 		} catch {
 			result = .init(output: nil, error: "\(error)")
