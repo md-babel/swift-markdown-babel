@@ -75,20 +75,29 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
 
     Usage: md-babel execute [--file <file>] --line <line> --column <column> [--dir </path/to/project>] [--config <config>] [--no-load-user-config]
 
-1. Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
-2. execute it in its context,
-3. and produce a [md-babel:execute-block:response][execute-block-schema]-formatted JSON to stdandard output.
+1.  Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
+2.  execute it in its context,
+3.  and produce a [md-babel:execute-block:response][execute-block-schema]-formatted JSON to stdandard output.
 
-The optional `--config` uses a separate environment configuration file that is merged with the user's global configuration.
+    Client editors can then process rhe resulting JSON response to insert the result of the code block. 
+    See for [a reference implementation in Emacs][md-babel.el] or [the Visual Studio Code plugin][vscode].
+    
+Other options:
 
-The optional `--dir` can be used to use relative instead of absolute paths for build products from code blocks, including images.
-Editors set this to the project or workspace directory to put assets in a common folder.
-
-Client editors can then process this to insert the result of the code block. 
-See [md-babel.el][] for an implementation in Emacs.
+-   The `--no-load-user-config` flag determines whether the [global configuration file](#configuration-file) should be used.
+    If you toggle this but then don't pass a `--config` file path to use instead, no code block evaluators will be known.
+-   The optional `--config` argument loads a configuration file that is merged with the user's global configuration by default. 
+    If you combine this with `--no-load-user-config`, only the config file you pass here will be used.
+-   The optional `--dir` can be used to use relative instead of absolute paths for build products from code blocks, including images.
+    Editors set this to the project or workspace directory to put assets in a common folder.
+  
+    The effective evaluator configuration should _not_ use absolute output `"directory"` keys for relative paths to work. 
+    Leaving the `"directory"` key out completely will put images in the project root; 
+    using relative directives like `"directory": "./assets"` will put them in a shared subdirectory.
 
 [execute-block-schema]: https://github.com/md-babel/md-babel-schema/tree/main/execute-block
 [md-babel.el]: https://github.com/md-babel/md-babel.el
+[vscode]: https://github.com/md-babel/vscode-md-babel
 
 ### Configuration
 
