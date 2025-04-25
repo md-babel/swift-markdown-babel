@@ -73,13 +73,16 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
 
 ### Execute Block
 
-    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--no-load-user-config] [--config <config>]
+    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--dir </path/to/project>] [--config <config>] [--no-load-user-config]
 
 1. Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
 2. execute it in its context,
 3. and produce a [md-babel:execute-block:response][execute-block-schema]-formatted JSON to stdandard output.
 
 The optional `--config` uses a separate environment configuration file that is merged with the user's global configuration.
+
+The optional `--dir` can be used to use relative instead of absolute paths for build products from code blocks, including images.
+Editors set this to the project or workspace directory to put assets in a common folder.
 
 Client editors can then process this to insert the result of the code block. 
 See [md-babel.el][] for an implementation in Emacs.
@@ -131,6 +134,8 @@ Here's a simple example for shell scripts and Python:
 
 If you can rely on `/usr/bin/env`, like with hash-bangs, you can set and forget it. 
 (With pyenv, rbenv, asdf, ... your mileage may vary!)
+
+[See the examples file](Examples.md) to learn how to configure various evaluators.
 
 [config-schema]: https://github.com/md-babel/md-babel-schema/tree/main/config
 
