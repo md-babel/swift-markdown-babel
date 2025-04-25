@@ -20,11 +20,17 @@ struct ExecuteCommand: AsyncParsableCommand {
 	)
 	var inputFile: URL?
 
+	@Option(
+		name: .customLong("filename"),
+		help: "Surrogate filename of the document, used in filename generators and references."
+	)
+	var filename: String?
+
 	func markdownDocument() throws -> MarkdownDocument {
 		if let inputFile {
 			return try MarkdownDocument(parsing: inputFile)
 		} else if let string = try stringFromStdin() {
-			return MarkdownDocument(parsing: string)
+			return MarkdownDocument(parsing: string, file: filename.map(File.init(filename:)) ?? .standardInput)
 		} else {
 			// To test this, try to `readLine()` twice; the second one will fail because STDIN has already been emptied.
 			throw GenericError(message: "Provide either non-empty STDIN or input file")

@@ -1,7 +1,5 @@
 import struct Foundation.URL
 
-// TODO: Introduce a --filename cli argument to set the filename even when passing in content via stdin: https://github.com/md-babel/swift-markdown-babel/issues/37
-
 /// The input file used during parsing.
 public struct File: Equatable, Sendable, CustomStringConvertible {
 	public static let standardInput = File(filename: "STDIN")

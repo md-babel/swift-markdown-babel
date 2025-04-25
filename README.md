@@ -73,7 +73,7 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
 
 ### Execute Block
 
-    Usage: md-babel execute [--file <file>] --line <line> --column <column> [--dir </path/to/project>] [--config <config>] [--no-load-user-config]
+    Usage: md-babel execute [--file <file>] [--filename <filename>] --line <line> --column <column> [--dir </path/to/project>] [--config <config>] [--no-load-user-config]
 
 1.  Grab the the code block from `<file>` (or standard input) at/around `<line>:<column>` (starting at 1, not 0, to meet CommonMark standards), 
 2.  execute it in its context,
@@ -84,6 +84,9 @@ In any case, all calls are routed through `md-babel` as your executable Markdown
     
 Other options:
 
+-   The `--filename` argument can be used (by editors) to enforce either provide a filename even though standard input is used, or to shadow the filename part from `<file>`.
+    Shadowing can be useful to strip filenames from date-time strings or other metadata first, and extract the human-readable part.
+    Image generators use this in their output file name patterns.
 -   The `--no-load-user-config` flag determines whether the [global configuration file](#configuration-file) should be used.
     If you toggle this but then don't pass a `--config` file path to use instead, no code block evaluators will be known.
 -   The optional `--config` argument loads a configuration file that is merged with the user's global configuration by default. 
