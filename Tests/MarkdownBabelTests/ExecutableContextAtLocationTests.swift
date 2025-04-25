@@ -33,7 +33,7 @@ func range(
 @Suite("ExecutableContext at location") struct ExecutableContextAtLocation {
 	private static func makeDocument(
 		followCodeWithBlock firstBlock: String = "",
-		sourceURL: URL? = nil,
+		file: File = .standardInput,
 		andThen secondBlock: String = ""
 	) -> MarkdownDocument {
 		return MarkdownDocument(
@@ -50,7 +50,7 @@ func range(
 
 				after
 				""",
-			sourceURL: sourceURL
+			file: file
 		)
 	}
 
@@ -66,13 +66,13 @@ func range(
 
 				after
 				""",
-			sourceURL: URL(filePath: "/path/to/my/file.md")
+			file: File(sourceURL: URL(filePath: "/path/to/my/document.md"))
 		)
 
 		@Test func returnsCodeBlockOnly() throws {
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
-				Code (/path/to/my/file.md):
+				Code (/path/to/my/document.md: document):
 				├─ CodeBlock @3:1-6:4 language: agda
 				│  η-× : ∀ {A B : Set} (w : A × B) → ⟨ proj₁ w , proj₂ w ⟩ ≡ w
 				│  η-× w = refl
@@ -125,11 +125,11 @@ func range(
 		@Test func returnsCodeBlockWithCodeBlockResult() throws {
 			let document = makeDocument(
 				followCodeWithBlock: Self.resultBlock,
-				sourceURL: URL(filePath: "/code/file.md")
+				file: .init(filename: "myfile")
 			)
 			let location = SourceLocation(line: 4, column: 1, source: nil)
 			let expectedDump = """
-				Code (/code/file.md):
+				Code (myfile):
 				├─ CodeBlock @3:1-5:4 language: sh
 				│  date
 				Result:

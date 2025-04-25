@@ -23,7 +23,7 @@ public struct ExecutableContext {
 	}
 
 	public let codeBlock: Markdown.CodeBlock
-	public let sourceURL: URL?
+	public let file: File
 	public let result: Result?
 	public let error: Error?
 
@@ -40,13 +40,13 @@ public struct ExecutableContext {
 
 	public init(
 		codeBlock: CodeBlock,
-		inFile sourceURL: URL? = nil,
+		inFile file: File,
 		result: Result? = nil,
 		error: Error? = nil
 	) {
 		precondition(codeBlock.range != nil, "CodeBlock needs to come from a document and have a range")
 		self.codeBlock = codeBlock
-		self.sourceURL = sourceURL
+		self.file = file
 		self.result = result
 		self.error = error
 	}
@@ -59,7 +59,7 @@ extension ExecutableContext: CustomDebugStringConvertible {
 
 	public func debugDescription(options: MarkupDumpOptions = []) -> String {
 		return """
-			Code (\(sourceURL?.path ?? "STDIN")):
+			Code (\(file)):
 			\(codeBlock.debugDescription(options: options))
 			Result:
 			\(result?.debugDescription(options: options) ?? "(No Result)")
