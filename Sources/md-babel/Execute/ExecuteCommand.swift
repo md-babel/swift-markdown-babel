@@ -117,7 +117,6 @@ struct ExecuteCommand: AsyncParsableCommand {
 		}
 		let configuration = try evaluatorRegistry().configuration(forCodeBlock: context.codeBlock)
 		let evaluator = configuration.makeEvaluator(
-			// TODO: Use output path command-lind argument https://github.com/md-babel/swift-markdown-babel/issues/34
 			outputDirectory: try outputDirectory(),
 			relativizePaths: relativizePaths
 		)
