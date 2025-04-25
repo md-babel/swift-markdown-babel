@@ -66,7 +66,16 @@ struct ExecuteCommand: AsyncParsableCommand {
 		)
 	)
 	var workingDirectoryPath: String?
-	var relativizePaths: Bool { workingDirectoryPath != nil }
+
+	@Flag(
+		name: .customLong("relative-paths"),
+		inversion: .prefixedNo,
+		exclusivity: .exclusive,
+		help: "Whether to use relative paths when possible."
+	)
+	var allowsRelativePaths = true
+
+	var relativizePaths: Bool { allowsRelativePaths && workingDirectoryPath != nil }
 
 	// MARK: - Config File
 

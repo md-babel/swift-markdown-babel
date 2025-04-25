@@ -88,13 +88,33 @@ Other options:
     If you toggle this but then don't pass a `--config` file path to use instead, no code block evaluators will be known.
 -   The optional `--config` argument loads a configuration file that is merged with the user's global configuration by default. 
     If you combine this with `--no-load-user-config`, only the config file you pass here will be used.
--   The optional `--dir` can be used to use relative instead of absolute paths for build products from code blocks, including images.
+-   The optional `--dir` can be used to resolve relative build product paths from code blocks, including images.
     Editors set this to the project or workspace directory to put assets in a common folder.
+    The default (unset) uses temporary directories.
   
     The effective evaluator configuration should _not_ use absolute output `"directory"` keys for relative paths to work. 
     Leaving the `"directory"` key out completely will put images in the project root; 
     using relative directives like `"directory": "./assets"` will put them in a shared subdirectory.
+-   The `--no-relative-paths` flag forces e.g. image literals to always use absolute paths. 
+    By default, relative paths will be preferred. 
+    Relative paths are based on the `--dir` argument, if present, falling back to the dirname of `--file`, if present. 
+    Without both, paths are resolved against the default temporary directory.
 
+Examples for image output and the literal inserted into your document:
+
+- Given arguments: `--file /home/you/test.md`  
+  and evaluator directory: `"./assets"`  
+  Then creates image at path: `/tmp/assets/image.png`  
+  and literal output: `![](/tmp/assets/image.png)`
+- Given arguments: `--file /home/you/test.md --dir /home/you`  
+  and evaluator directory: `"./assets"`  
+  Then creates image at path: `/home/you/assets/image.png`  
+  and literal output: `![](assets/image.png)`
+- Given arguments: `--file /home/you/test.md --dir /home/you --no-relative-paths`  
+  and evaluator directory: `"./assets"`  
+  Then creates image at path: `/home/you/assets/image.png`  
+  and literal output: `![](/home/you/assets/image.png)`
+  
 [execute-block-schema]: https://github.com/md-babel/md-babel-schema/tree/main/execute-block
 [md-babel.el]: https://github.com/md-babel/md-babel.el
 [vscode]: https://github.com/md-babel/vscode-md-babel
