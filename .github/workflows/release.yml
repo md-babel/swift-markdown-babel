@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release_macos:
+    name: Release latest macOS executable
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Swift
+        uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: "6.1.0"
+      - name: Build
+        run: |
+          swift build --configuration release --triple arm64-apple-macosx
+          swift build --configuration release --triple x86_64-apple-macosx
+          BIN_PATH_ARM64=$(swift build --configuration release --triple arm64-apple-macosx --show-bin-path)
+          BIN_PATH_AMD64=$(swift build --configuration release --triple x86_64-apple-macosx --show-bin-path)
+          mkdir macos-universal-${{ github.ref_name }}
+          lipo -create -output macos-universal-${{ github.ref_name }}/executable "$BIN_PATH_ARM64/executable" "$BIN_PATH_AMD64/executable"
+          tar --create --bzip2 --file executable_macos-universal-${{ github.ref_name }}.tar.bz2 --directory macos-universal-${{ github.ref_name }} executable
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: executable_macos-universal-${{ github.ref_name }}.tar.bz2
+
+  release_linux:
+    name: Release latest Linux executable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Swift
+        uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: "6.1.0"
+      - name: Build
+        run: |
+          swift sdk install https://download.swift.org/swift-6.1-release/static-sdk/swift-6.1-RELEASE/swift-6.1-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz --checksum 111c6f7d280a651208b8c74c0521dd99365d785c1976a6e23162f55f65379ac6
+          swift build --configuration release --swift-sdk aarch64-swift-linux-musl
+          swift build --configuration release --swift-sdk x86_64-swift-linux-musl
+          BIN_PATH_ARM64=$(swift build --configuration release --swift-sdk aarch64-swift-linux-musl --show-bin-path)
+          BIN_PATH_AMD64=$(swift build --configuration release --swift-sdk x86_64-swift-linux-musl --show-bin-path)
+          tar --create --bzip2 --file executable_linux-arm64-${{ github.ref_name }}.tar.bz2 --directory "$BIN_PATH_ARM64" executable
+          tar --create --bzip2 --file executable_linux-amd64-${{ github.ref_name }}.tar.bz2 --directory "$BIN_PATH_AMD64" executable
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            executable_linux-arm64-${{ github.ref_name }}.tar.bz2
+            executable_linux-amd64-${{ github.ref_name }}.tar.bz2
