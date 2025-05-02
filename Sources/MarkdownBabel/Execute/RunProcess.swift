@@ -42,8 +42,7 @@ struct RunProcess {
 		input string: String,
 		completionHandler: @escaping CompletionHandler
 	) throws(PipeStringDataConversionFailed) {
-		guard let data = string.data(using: .utf8, allowLossyConversion: false)
-		else { throw PipeStringDataConversionFailed(string: string) }
+		let data = Data(string.utf8)
 		launch(
 			tool: tool,
 			arguments: arguments,

@@ -20,9 +20,8 @@ final class ContentHash: Equatable {
 		self.content = content
 	}
 
-	convenience init?(string: String, encoding: String.Encoding = .utf8) {
-		guard let data = string.data(using: encoding)
-		else { return nil }
+	convenience init(string: String) {
+		let data = Data(string.utf8)
 		self.init(content: data)
 	}
 }

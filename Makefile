@@ -18,9 +18,11 @@ $(linux_files) &:
 .build/$(version)/x86_64-apple-macosx/release/md-babel:
 	swift build --quiet --scratch-path .build/$(version) --configuration release --triple x86_64-apple-macosx
 
-release/md-babel_macos-universal-$(version).tar.bz2: .build/$(version)/arm64-apple-macosx/release/md-babel .build/$(version)/x86_64-apple-macosx/release/md-babel
+release/macos-universal-$(version)/md-babel: .build/$(version)/arm64-apple-macosx/release/md-babel .build/$(version)/x86_64-apple-macosx/release/md-babel
 	mkdir -p release/macos-universal-$(version)
 	lipo -create -output release/macos-universal-$(version)/md-babel .build/$(version)/{arm64,x86_64}-apple-macosx/release/md-babel
+
+release/md-babel_macos-universal-$(version).tar.bz2: release/macos-universal-$(version)/md-babel
 	tar --create --bzip2 --file release/md-babel_macos-universal-$(version).tar.bz2 --directory release/macos-universal-$(version) md-babel
 
 .PHONY: clean
