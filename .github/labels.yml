@@ -31,3 +31,5 @@
 - name: "wait"
   color: "#d876e3"
   description: "This depends on something else"
+- name: "ci"
+  color: "#dce3b5"
