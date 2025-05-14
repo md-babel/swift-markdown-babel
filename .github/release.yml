@@ -1,7 +1,4 @@
 changelog:
-  exclude:
-    authors:
-      - dependabot
   categories:
     - title: Features
       labels:
@@ -9,18 +6,6 @@ changelog:
     - title: Bugs fixed
       labels:
         - bug
-    - title: Documentation
-      labels:
-        - documentation
-    - title: CI
-      labels:
-        - ci
     - title: Other Changes
       labels:
         - "*"
-      exclude:
-        labels:
-          - dependabot
-    - title: Dependencies
-      labels:
-        - dependabot
