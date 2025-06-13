@@ -5,6 +5,10 @@ bindir = $(prefix)/bin
 
 version := $(shell git describe --tags)
 
+# NB: '$$' in Makefile essentially escapes the '$'; on the command line, the perl parameter would only use a single '$'.
+#     The 'FRM' is enough of a hint to find my team ID locally, but this won't work when building via GitHub actions.
+codesign_id ?= $(shell security find-identity -p basic -v | perl -lnE 'if(/("Developer ID Application: [^"]+")/){say "$$1"}' | grep FRM)
+
 linux_files = release/md-babel_linux-amd64-$(version).tar.bz2 release/md-babel_linux-arm64-$(version).tar.bz2
 
 $(linux_files) &:
@@ -21,6 +25,7 @@ $(linux_files) &:
 release/macos-universal-$(version)/md-babel: .build/$(version)/arm64-apple-macosx/release/md-babel .build/$(version)/x86_64-apple-macosx/release/md-babel
 	mkdir -p release/macos-universal-$(version)
 	lipo -create -output release/macos-universal-$(version)/md-babel .build/$(version)/{arm64,x86_64}-apple-macosx/release/md-babel
+	codesign --sign $(codesign_id) --options runtime --timestamp release/macos-universal-$(version)/md-babel
 
 release/md-babel_macos-universal-$(version).tar.bz2: release/macos-universal-$(version)/md-babel
 	tar --create --bzip2 --file release/md-babel_macos-universal-$(version).tar.bz2 --directory release/macos-universal-$(version) md-babel
