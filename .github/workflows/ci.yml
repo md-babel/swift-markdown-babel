@@ -19,7 +19,7 @@ jobs:
     name: Test on macOS 15
     runs-on: macOS-15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Xcode Select Version
         uses: mobiledevops/xcode-select-version-action@v1
         with:
@@ -30,7 +30,7 @@ jobs:
     name: Test on Ubuntu 24.04
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Test
         run: set -o pipefail && swift test
   spelling:
@@ -38,14 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Actions Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Spell Check Repo
         uses: crate-ci/typos@v1.37.1
   swift-format:
     name: swift-format
     runs-on: macOS-15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Xcode Select Version
         uses: mobiledevops/xcode-select-version-action@v1
         with:
