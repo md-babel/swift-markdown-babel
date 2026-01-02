@@ -15,7 +15,7 @@ let package = Package(
 		.package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
 		.package(url: "https://github.com/objecthub/swift-dynamicjson.git", from: "1.0.1"),
 		// CryptoKit drop-in replacement, used for hashing
-		.package(url: "https://github.com/apple/swift-crypto.git", "1.0.0"..<"4.0.0"),
+		.package(url: "https://github.com/apple/swift-crypto.git", "1.0.0"..<"5.0.0"),
 	],
 	targets: [
 		.target(
