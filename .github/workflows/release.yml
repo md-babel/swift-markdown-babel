@@ -29,7 +29,7 @@ jobs:
           lipo -create -output macos-universal-${{ github.ref_name }}/md-babel "$BIN_PATH_ARM64/md-babel" "$BIN_PATH_AMD64/md-babel"
           tar --create --bzip2 --file md-babel_macos-universal-${{ github.ref_name }}.tar.bz2 --directory macos-universal-${{ github.ref_name }} md-babel
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: md-babel_macos-universal-${{ github.ref_name }}.tar.bz2
 
@@ -53,7 +53,7 @@ jobs:
           tar --create --bzip2 --file md-babel_linux-arm64-${{ github.ref_name }}.tar.bz2 --directory "$BIN_PATH_ARM64" md-babel
           tar --create --bzip2 --file md-babel_linux-amd64-${{ github.ref_name }}.tar.bz2 --directory "$BIN_PATH_AMD64" md-babel
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             md-babel_linux-arm64-${{ github.ref_name }}.tar.bz2
